@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>1. 增量形式圆柱绕流 &mdash; 有限元 draft 文档</title>
+  <title>Navier–Stokes 方程与弱形式 &mdash; 有限元 draft 文档</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
@@ -49,19 +49,34 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="导航菜单">
               <p class="caption" role="heading"><span class="caption-text">目录:</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">1. 增量形式圆柱绕流</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#1.1-CN1">1.1 CN1</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Navier–Stokes 方程与弱形式</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#1.-方程组">1. 方程组</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#2.-初始与边界条件">2. 初始与边界条件</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#3.-弱形式推导">3. 弱形式推导</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="#2.-一般形式圆柱绕流BDF1">2. 一般形式圆柱绕流BDF1</a></li>
-<li class="toctree-l1"><a class="reference internal" href="#3.-一般形式圆柱绕流CN2">3. 一般形式圆柱绕流CN2</a></li>
-<li class="toctree-l1"><a class="reference internal" href="#4.-CN2增量形式">4. CN2增量形式</a></li>
-<li class="toctree-l1"><a class="reference internal" href="#4.-BDF2">4. BDF2</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#4.1-BDF2一般形式">4.1 BDF2一般形式</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#4.2-BDF2增量形式">4.2 BDF2增量形式</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#1.-必要准备">1. 必要准备</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#1.1-导入必要库">1.1 导入必要库</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#1.2-必要参数设置">1.2 必要参数设置</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="#5.-投影法">5. 投影法</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#2.-几何建模与网格生成（Geometry-and-Mesh-Generation）">2. 几何建模与网格生成（Geometry and Mesh Generation）</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#2.1-几何定义">2.1 几何定义</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#2.2-边界条件区域标记">2.2 边界条件区域标记</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#2.3-网格生成">2.3 网格生成</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="#3.-有限元空间，边界条件与初值条件设定（Finite-Element-Spaces,-Boundary-Conditions-and-Initial-Condition）">3. 有限元空间，边界条件与初值条件设定（Finite Element Spaces, Boundary Conditions and Initial Condition）</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#3.1-有限元空间定义">3.1 有限元空间定义</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#3.2-解函数与边界条件设定">3.2 解函数与边界条件设定</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#3.3-Stokes-初始解的构造">3.3 Stokes 初始解的构造</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#4-时间离散与对流项处理">4 时间离散与对流项处理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#4.1-一般形式">4.1 一般形式</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#非齐次-Dirichlet-边界条件的处理">非齐次 Dirichlet 边界条件的处理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#4.2-增量形式">4.2 增量形式</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="#5.-结果输出与可视化准备（Postprocessing-and-Visualization-Setup）">5. 结果输出与可视化准备（Postprocessing and Visualization Setup）</a></li>
 </ul>
 
         </div>
@@ -78,7 +93,7 @@
           <div role="navigation" aria-label="页面导航">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">1. 增量形式圆柱绕流</li>
+      <li class="breadcrumb-item active">Navier–Stokes 方程与弱形式</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/notebooks/Flow_around_a_cylinder.ipynb.txt" rel="nofollow"> 查看页面源码</a>
       </li>
@@ -88,60 +103,390 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+  <section id="Navier–Stokes-方程与弱形式">
+<h1>Navier–Stokes 方程与弱形式<a class="headerlink" href="#Navier–Stokes-方程与弱形式" title="Link to this heading"></a></h1>
+<p>不可压缩 Navier–Stokes 方程是描述粘性不可压流体随时间演化的基本模型，广泛应用于工程、物理和生物流体等领域。在本节中，我们将介绍其强形式与弱形式，并为后续数值离散构建理论基础。</p>
+<section id="1.-方程组">
+<h2>1. 方程组<a class="headerlink" href="#1.-方程组" title="Link to this heading"></a></h2>
+<p>考虑在时空区域 <span class="math notranslate nohighlight">\(Q := \Omega \times (0,T)\)</span> 上的不可压缩 Navier–Stokes 方程，其组成如下：</p>
+<ol class="arabic">
+<li><p><strong>动量方程（Newton 第二定律）</strong>：</p>
+<div class="math notranslate nohighlight">
+\[\rho \frac{\partial \mathbf{u}}{\partial t} + \rho (\mathbf{u} \cdot \nabla) \mathbf{u} = -\nabla p + \mu \Delta \mathbf{u} + \mathbf{f},\]</div>
+</li>
+<li><p><strong>质量守恒方程（不可压缩性约束）</strong>：</p>
+<div class="math notranslate nohighlight">
+\[\nabla \cdot \mathbf{u} = 0.\]</div>
+</li>
+</ol>
+<p>其中变量含义为：</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(\mathbf{u} : \Omega \to \mathbb{R}^d\)</span> 为速度场；</p></li>
+<li><p><span class="math notranslate nohighlight">\(p : \Omega \to \mathbb{R}\)</span> 为压力场；</p></li>
+<li><p><span class="math notranslate nohighlight">\(\rho\)</span> 为常数密度；</p></li>
+<li><p><span class="math notranslate nohighlight">\(\mu\)</span> 为动力黏性系数；</p></li>
+<li><p><span class="math notranslate nohighlight">\(\mathbf{f}\)</span> 为体积力源项；</p></li>
+<li><p>通常 <span class="math notranslate nohighlight">\(\Omega \subset \mathbb{R}^d\)</span>，<span class="math notranslate nohighlight">\(d=2\)</span> 或 <span class="math notranslate nohighlight">\(3\)</span>。</p></li>
+</ul>
+</section>
+<hr class="docutils" />
+<section id="2.-初始与边界条件">
+<h2>2. 初始与边界条件<a class="headerlink" href="#2.-初始与边界条件" title="Link to this heading"></a></h2>
+<p>为使问题适定，需要规定以下边值条件与初始条件：</p>
+<ul>
+<li><p><strong>速度 Dirichlet 边界条件</strong>：</p>
+<div class="math notranslate nohighlight">
+\[\mathbf{u} = \mathbf{g} \quad \text{on } \partial \Omega_D \times (0,T),\]</div>
+</li>
+<li><p><strong>Neumann 自然边界条件</strong>（对应出口或自由边界）：</p>
+<div class="math notranslate nohighlight">
+\[\boldsymbol{\sigma}(\mathbf{u}, p) \cdot \mathbf{n} = \mathbf{h} \quad \text{on } \partial \Omega_N \times (0,T),\]</div>
+<p>其中</p>
+<div class="math notranslate nohighlight">
+\[\boldsymbol{\sigma}(\mathbf{u}, p) := -p \mathbf{I} + 2\mu \varepsilon(\mathbf{u}), \quad
+\varepsilon(\mathbf{u}) := \frac{1}{2}(\nabla \mathbf{u} + \nabla \mathbf{u}^T).\]</div>
+</li>
+<li><p><strong>初始条件</strong>：</p>
+<div class="math notranslate nohighlight">
+\[\mathbf{u}(\mathbf{x}, 0) = \mathbf{u}_0(\mathbf{x}) \quad \text{in } \Omega.\]</div>
+</li>
+</ul>
+</section>
+<hr class="docutils" />
+<section id="3.-弱形式推导">
+<h2>3. 弱形式推导<a class="headerlink" href="#3.-弱形式推导" title="Link to this heading"></a></h2>
+<p>为进行有限元离散，我们对方程组乘以测试函数，并在空间上积分，得到如下弱形式。</p>
+<p>设：</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(\mathbf{V} := \{ \mathbf{v} \in [H^1(\Omega)]^d \mid \mathbf{v} = \mathbf{0} \text{ on } \partial \Omega_D \}\)</span>；</p></li>
+<li><p><span class="math notranslate nohighlight">\(Q := L^2(\Omega)\)</span>。</p></li>
+</ul>
+<p>则寻找 <span class="math notranslate nohighlight">\((\mathbf{u}, p) : [0, T] \to \mathbf{V} \times Q\)</span>，使得对于任意 <span class="math notranslate nohighlight">\((\mathbf{v}, q) \in \mathbf{V} \times Q\)</span>，有：</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{aligned}
+\int_{\Omega} \partial_t \mathbf{u} \cdot \mathbf{v} \, dx
++ \int_{\Omega} \nu \nabla \mathbf{u} : \nabla \mathbf{v} \, dx
++ \int_{\Omega} (\mathbf{u} \cdot \nabla)\mathbf{u} \cdot \mathbf{v} \, dx
+- \int_{\Omega} p \nabla \cdot \mathbf{v} \, dx
+&amp;= \int_{\Omega} \mathbf{f} \cdot \mathbf{v} \, dx, \\
+- \int_{\Omega} q \, \nabla \cdot \mathbf{u} \, dx &amp;= 0.
+\end{aligned}\end{split}\]</div>
+<p>附带初始条件：</p>
+<div class="math notranslate nohighlight">
+\[\mathbf{u}(x, 0) = \mathbf{u}_0(x) \quad \text{in } \Omega.\]</div>
+</section>
+</section>
+<section id="1.-必要准备">
+<h1>1. 必要准备<a class="headerlink" href="#1.-必要准备" title="Link to this heading"></a></h1>
+<section id="1.1-导入必要库">
+<h2>1.1 导入必要库<a class="headerlink" href="#1.1-导入必要库" title="Link to this heading"></a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># import libarries, define geometry and generate mesh
-from ngsolve import *
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>from ngsolve import *
 from ngsolve.webgui import Draw
 from netgen.occ import *
 from netgen.webgui import Draw as DrawGeo
 import matplotlib
 import numpy as np
 import matplotlib.pyplot as plt
-
-shape = Rectangle(2.2,0.41).Circle(0.2,0.2,0.05).Reverse().Face()
-shape.edges.name=&quot;cyl&quot;
-shape.edges.Min(X).name=&quot;inlet&quot;
-shape.edges.Max(X).name=&quot;outlet&quot;
-shape.edges.Min(Y).name=&quot;wall&quot;
-shape.edges.Max(Y).name=&quot;wall&quot;
-mesh = Mesh(OCCGeometry(shape, dim=2).GenerateMesh(maxh=1/8)).Curve(3)
-n  = specialcf.normal(mesh.dim)
-# viscosity
-nu = 0.001
-
-k = 3
-V = VectorH1(mesh,order=k, dirichlet=&quot;wall|cyl|inlet&quot;)
-Q = H1(mesh,order=k-1)
-X = V*Q
-
-gfu = GridFunction(X)
-velocity, pressure = gfu.components
-# parabolic inflow at bc=1:
-uin = CoefficientFunction((1.5*4*y*(0.41-y)/(0.41*0.41),0))
-velocity.Set(uin, definedon=mesh.Boundaries(&quot;inlet&quot;))
-
-# Draw(velocity,mesh,&quot;u&quot;)
-# Draw(pressure,mesh,&quot;p&quot;)
-
-(u,p), (v,q) = X.TnT()
-
-a = BilinearForm(X)
-stokes = (nu*InnerProduct(grad(u),grad(v))-div(u)*q-div(v)*p)*dx
-a += stokes
-a.Assemble()
-
-f = LinearForm(X)
-f.Assemble()
-
-res = f.vec - a.mat*gfu.vec
-inv_stokes = a.mat.Inverse(X.FreeDofs())
-gfu.vec.data += inv_stokes * res
-
+</pre></div>
+</div>
+</div>
+</section>
+<section id="1.2-必要参数设置">
+<h2>1.2 必要参数设置<a class="headerlink" href="#1.2-必要参数设置" title="Link to this heading"></a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>nu = 0.001
 dt = 0.001
-# matrix for implicit part of IMEX(1) scheme:
+k = 3
+tend = 1
+t = 0; cnt = 0
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+<section id="2.-几何建模与网格生成（Geometry-and-Mesh-Generation）">
+<h1>2. 几何建模与网格生成（Geometry and Mesh Generation）<a class="headerlink" href="#2.-几何建模与网格生成（Geometry-and-Mesh-Generation）" title="Link to this heading"></a></h1>
+<p>为研究不可压缩纳维-斯托克斯（Navier–Stokes）方程在典型二维内部流动结构中的数值行为，本文采用有限元软件 <strong>NGSolve</strong> 构建了一个包含圆柱障碍物的二维矩形通道几何模型。该几何结构为经典的 <strong>流经圆柱的流体问题（flow around a cylinder）</strong> 提供了基础测试平台。</p>
+<section id="2.1-几何定义">
+<h2>2.1 几何定义<a class="headerlink" href="#2.1-几何定义" title="Link to this heading"></a></h2>
+<p>本研究所用的二维流动区域由以下部分构成：</p>
+<ul class="simple">
+<li><p>一个长为 <span class="math notranslate nohighlight">\(2.2\)</span>、高为 <span class="math notranslate nohighlight">\(0.41\)</span> 的矩形通道；</p></li>
+<li><p>通道内部嵌有一个位于坐标点 <span class="math notranslate nohighlight">\((0.2, 0.2)\)</span>、半径为 <span class="math notranslate nohighlight">\(0.05\)</span> 的圆柱障碍物。</p></li>
+</ul>
+<p>上述几何通过 <code class="docutils literal notranslate"><span class="pre">Netgen/NGSolve</span></code> 的 <code class="docutils literal notranslate"><span class="pre">OCCGeometry</span></code> 模块构造如下：</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>shape = Rectangle(2.2,0.41).Circle(0.2,0.2,0.05).Reverse().Face()
+</pre></div>
+</div>
+</div>
+</section>
+<section id="2.2-边界条件区域标记">
+<h2>2.2 边界条件区域标记<a class="headerlink" href="#2.2-边界条件区域标记" title="Link to this heading"></a></h2>
+<p>为设定恰当的边界条件，需为几何边界赋予明确的名称，以便在后续弱形式构造与有限元空间定义中调用。具体边界标记如下：</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># 为几何边界命名，用于后续施加边界条件
+shape.edges.name = &quot;cyl&quot;             # 内部圆柱边界
+shape.edges.Min(X).name = &quot;inlet&quot;    # 左侧入口边界
+shape.edges.Max(X).name = &quot;outlet&quot;   # 右侧出口边界
+shape.edges.Min(Y).name = &quot;wall&quot;     # 下壁面
+shape.edges.Max(Y).name = &quot;wall&quot;     # 上壁面
+</pre></div>
+</div>
+</div>
+</section>
+<section id="2.3-网格生成">
+<h2>2.3 网格生成<a class="headerlink" href="#2.3-网格生成" title="Link to this heading"></a></h2>
+<p>构建完成的几何体通过 OCC（OpenCascade） 内核生成有限元网格。为平衡计算效率与精度，本文将最大单元尺寸 <code class="docutils literal notranslate"><span class="pre">maxh</span></code> 设置为 <span class="math notranslate nohighlight">\(1/8\)</span>，并使用三阶曲线单元对边界进行几何拟合。</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>mesh = Mesh(OCCGeometry(shape, dim=2).GenerateMesh(maxh=1/8)).Curve(3)
+# `GenerateMesh(maxh=1/8)` 表示使用最大网格尺度为 $0.125$；
+# `.Curve(3)` 将几何边界提升为三阶拟合，以更准确地表示圆柱边界。
+</pre></div>
+</div>
+</div>
+<p>绘制图像（可选）</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>DrawGeo(shape);
+Draw(mesh);
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "ece3271e4d264c8baef666844206dd34", "version_major": 2, "version_minor": 0}</script></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "4455b6cb4a1845f3b10a9afdf36078b9", "version_major": 2, "version_minor": 0}</script></div>
+</div>
+</section>
+</section>
+<section id="3.-有限元空间，边界条件与初值条件设定（Finite-Element-Spaces,-Boundary-Conditions-and-Initial-Condition）">
+<h1>3. 有限元空间，边界条件与初值条件设定（Finite Element Spaces, Boundary Conditions and Initial Condition）<a class="headerlink" href="#3.-有限元空间，边界条件与初值条件设定（Finite-Element-Spaces,-Boundary-Conditions-and-Initial-Condition）" title="Link to this heading"></a></h1>
+<p>为求解不可压缩 Navier–Stokes 方程，我们采用混合有限元方法构造速度和压力的函数空间。速度采用二阶向量型连续有限元（VectorH1），压力采用一阶标量连续有限元（H1），从而形成经典的 P2-P1 速度-压力配对，满足稳定性条件。</p>
+<section id="3.1-有限元空间定义">
+<h2>3.1 有限元空间定义<a class="headerlink" href="#3.1-有限元空间定义" title="Link to this heading"></a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>V = VectorH1(mesh, order=k, dirichlet=&quot;wall|cyl|inlet&quot;)  # 设置速度空间，指定 Dirichlet 边界为壁面、圆柱和入口
+Q = H1(mesh, order=k-1)                                  # 压力空间为标量一阶 H1 空间
+X = V * Q                                                # 构造混合有限元空间（速度 × 压力）
+</pre></div>
+</div>
+</div>
+</section>
+<section id="3.2-解函数与边界条件设定">
+<h2>3.2 解函数与边界条件设定<a class="headerlink" href="#3.2-解函数与边界条件设定" title="Link to this heading"></a></h2>
+<p>在耦合空间 <code class="docutils literal notranslate"><span class="pre">X</span></code> 上定义解函数 <code class="docutils literal notranslate"><span class="pre">gfu</span></code> ，其包含速度和压力两个分量，分别命名以方便调用和边界条件施加。</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>gfu = GridFunction(X)
+velocity, pressure = gfu.components
+</pre></div>
+</div>
+</div>
+<p>为解向量定义非齐次Dirichlet边界条件 在入口处施加典型的层流抛物线速度分布，其 <span class="math notranslate nohighlight">\(x\)</span> 方向速度分布为：</p>
+<div class="math notranslate nohighlight">
+\[u_{\text{in}}(y) = \left( \frac{6}{0.41^2} y(0.41 - y), \; 0 \right)\]</div>
+<p>该分布在上下壁面速度为零，中部最大，符合管道流理论。</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>uin = CoefficientFunction((1.5 * 4 * y * (0.41 - y) / (0.41 * 0.41), 0))  # 抛物线型入口速度分布
+velocity.Set(uin, definedon=mesh.Boundaries(&quot;inlet&quot;))                    # 在 inlet 边界上设置速度 Dirichlet 条件
+</pre></div>
+</div>
+</div>
+<p>绘制图像（可选）</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>Draw(velocity);
+Draw(pressure);
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "494d3a386f784cbf877a6677bcb80fdb", "version_major": 2, "version_minor": 0}</script></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "882cb4fe3a7144439851d34f277d5209", "version_major": 2, "version_minor": 0}</script></div>
+</div>
+</section>
+<section id="3.3-Stokes-初始解的构造">
+<h2>3.3 Stokes 初始解的构造<a class="headerlink" href="#3.3-Stokes-初始解的构造" title="Link to this heading"></a></h2>
+<p>为提供稳定的初值，用稳态 Stokes 问题构造一个速度–压力场作为初始化。首先定义试验函数和检验函数，并构建双线性形式：</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>(u, p), (v, q) = X.TnT()                                                  # 获取试验函数与检验函数
+a = BilinearForm(X)                                                      # 定义双线性形式
+stokes = (nu * InnerProduct(grad(u), grad(v)) - div(u) * q - div(v) * p) * dx  # Stokes 双线性项
+a += stokes                                                              # 加入双线性形式中
+a.Assemble();                                                             # 组装刚度矩阵
+f = LinearForm(X)         # 定义右端项
+f.Assemble()              # 组装右端项
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;ngsolve.comp.LinearForm at 0x201af945c70&gt;
+</pre></div></div>
+</div>
+<p>最后求解 Stokes 系统，并将解更新至 ‘gfu.vec’ 以作为后续 Navier–Stokes 求解的初始值：</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>res = f.vec - a.mat * gfu.vec                  # 计算初始残差
+inv_stokes = a.mat.Inverse(X.FreeDofs())       # 构建在自由自由度上的逆算子
+gfu.vec.data += inv_stokes * res               # 更新解函数为稳态 Stokes 解
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>drag_x_test = GridFunction(X)
+drag_x_test.components[0].Set(CoefficientFunction((-20.0,0)), definedon=mesh.Boundaries(&quot;cyl&quot;))
+drag_y_test = GridFunction(X)
+drag_y_test.components[0].Set(CoefficientFunction((0,-20.0)), definedon=mesh.Boundaries(&quot;cyl&quot;))
+</pre></div>
+</div>
+</div>
+<p>绘制图像（可选）</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>Draw(velocity);
+Draw(pressure);
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "67b63b89b23e4768bc566121603a1046", "version_major": 2, "version_minor": 0}</script></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "3786351c593d42ed9cd5b5792c5128cb", "version_major": 2, "version_minor": 0}</script></div>
+</div>
+</section>
+<section id="4-时间离散与对流项处理">
+<h2>4 时间离散与对流项处理<a class="headerlink" href="#4-时间离散与对流项处理" title="Link to this heading"></a></h2>
+<p>不可压缩 Navier–Stokes 方程的完整形式为：</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{aligned}
+\partial_t \mathbf{u} + (\mathbf{u} \cdot \nabla)\mathbf{u} - \nu \Delta \mathbf{u} + \nabla p &amp;= \mathbf{f} \quad \text{in } \Omega, \\
+\operatorname{div}(\mathbf{u}) &amp;= 0 \quad \text{in } \Omega.
+\end{aligned}\end{split}\]</div>
+</section>
+<section id="4.1-一般形式">
+<h2>4.1 一般形式<a class="headerlink" href="#4.1-一般形式" title="Link to this heading"></a></h2>
+<p>我们采用 <strong>隐式–显式欧拉时间离散（IMEX Euler）</strong> 策略，对时间导数项使用向后差分，对扩散项隐式处理，对对流项显式处理。</p>
+<p>设当前时间为 <span class="math notranslate nohighlight">\(t^n\)</span>，时间步长为 <span class="math notranslate nohighlight">\(\Delta t\)</span>，已知速度解 <span class="math notranslate nohighlight">\(\mathbf{u}^n\)</span>，则时间离散形式为：</p>
+<p><span class="math notranslate nohighlight">\((\mathbf{u}^{n+1},p^{n+1}) \in X = \mathbf{V} \times Q\)</span>, s.t. for all <span class="math notranslate nohighlight">\((\mathbf{v},q) \in X = \mathbf{V} \times Q\)</span></p>
+<p><span class="math">\begin{align}
+\underbrace{m(\mathbf{u}^{n+1},\mathbf{v}) + \Delta t ~\cdot~a((\mathbf{u}^{n+1},p^{n+1}),(\mathbf{v},q))}_{ \to M^\ast} ~=~m(\mathbf{u}^{n},\mathbf{v}) - \Delta t ~\cdot~c(\mathbf{u}^{n}; \mathbf{u}^{n},\mathbf{v})
+\end{align}</span></p>
+</section>
+<section id="非齐次-Dirichlet-边界条件的处理">
+<h2>非齐次 Dirichlet 边界条件的处理<a class="headerlink" href="#非齐次-Dirichlet-边界条件的处理" title="Link to this heading"></a></h2>
+<p>上节推导的离散系统默认速度满足 <span class="math notranslate nohighlight">\(\mathbf{u} = 0\)</span> 于 <span class="math notranslate nohighlight">\(\partial \Omega_D\)</span>（即齐次 Dirichlet 条件）。在实际问题中，尤其是通道流、绕流问题中，我们往往在入口边界施加给定的速度剖面（如抛物线型分布）：</p>
+<div class="math notranslate nohighlight">
+\[\mathbf{u} = \mathbf{g} \neq 0 \quad \text{on } \partial \Omega_D.\]</div>
+<p>为处理这类<strong>非齐次边界条件</strong>，常用的方法是<strong>变量替换法（lifting method）</strong>，即将问题的解写为：</p>
+<div class="math notranslate nohighlight">
+\[\mathbf{u}^{n+1} = \mathbf{u}_h^{n+1} + \tilde{\mathbf{g}},\]</div>
+<p>其中：</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(\mathbf{u}_h^{n+1} \in \mathbf{V}_0\)</span>，满足齐次边界条件，即 <span class="math notranslate nohighlight">\(\mathbf{u}_h^{n+1} = 0\)</span> on <span class="math notranslate nohighlight">\(\partial \Omega_D\)</span>；</p></li>
+<li><p><span class="math notranslate nohighlight">\(\tilde{\mathbf{g}}\)</span> 是某个固定向量场，满足边界条件 <span class="math notranslate nohighlight">\(\tilde{\mathbf{g}} = \mathbf{g}\)</span> on <span class="math notranslate nohighlight">\(\partial \Omega_D\)</span>，在内部可以任意延拓。</p></li>
+</ul>
+<p>将 <span class="math notranslate nohighlight">\(\mathbf{u}^{n+1}\)</span> 代入离散系统中，并将其分离为：</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{pmatrix}
+    K &amp; Q \\
+    Q^T &amp; 0
+\end{pmatrix}
+\begin{pmatrix}
+    \mathbf{u}_h^{n+1} \\
+    \mathbf{p}^{n+1}
+\end{pmatrix}
+=
+\begin{pmatrix}
+    \mathrm{RHS}^{(i)} - K \tilde{\mathbf{g}} \\
+    - Q^T \tilde{\mathbf{g}}
+\end{pmatrix}.\end{split}\]</div>
+<p>我们看到，<strong>非齐次边界条件的影响表现为右端项的修正</strong>，且不改变系统矩阵本身的结构。这种处理方法有两个优点：</p>
+<ul class="simple">
+<li><p>不需修改原有刚度矩阵装配过程；</p></li>
+<li><p>保证数值求解仅在自由度上进行，边界值通过 <span class="math notranslate nohighlight">\(\tilde{\mathbf{g}}\)</span> 注入解中。</p></li>
+</ul>
+<p>在实现中，<span class="math notranslate nohighlight">\(\tilde{\mathbf{g}}\)</span> 通常通过如下方式构造：</p>
+<ul class="simple">
+<li><p>在边界上插值速度剖面 <span class="math notranslate nohighlight">\(\mathbf{g}\)</span>；</p></li>
+<li><p>在内部扩展为零或任意连续向量场；</p></li>
+<li><p>将其作为 <code class="docutils literal notranslate"><span class="pre">GridFunction</span></code> 的“已知值”施加在 Dirichlet 边界上；</p></li>
+<li><p>并将自由节点构成的子系统送入线性求解器。</p></li>
+</ul>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>gfuD = GridFunction(X)
+velocityD, pressureD = gfuD.components
+
+velocityD.Set(uin, definedon=mesh.Boundaries(&quot;inlet&quot;))
+
 mstar = BilinearForm(X)
 mstar += InnerProduct(u,v)*dx + dt*stokes
 mstar.Assemble()
@@ -150,12 +495,115 @@ inv = mstar.mat.Inverse(X.FreeDofs())
 conv = BilinearForm(X, nonassemble = True)
 conv += (Grad(u) * u) * v * dx
 
-tend = 0
+m = BilinearForm(InnerProduct(u,v)*dx).Assemble()
+
 gfut = GridFunction(gfu.space,multidim=0)
 time_vals, drag_x_vals, drag_y_vals = [],[],[]
 
-# implicit Euler/explicit Euler splitting method:
-tend += 25
+gfut.AddMultiDimComponent(gfu.vec)
+t = 0; cnt = 0
+while t &lt; tend-0.5*dt:
+    print (&quot;\rt=&quot;, t, end=&quot;&quot;)
+
+    conv.Assemble()
+    # print(conv.mat)
+    rhs = (m.mat - dt * conv.mat) * gfu.vec - mstar.mat * gfuD.vec
+    gfu.vec.data = gfuD.vec + inv * rhs
+
+    t = t + dt; cnt += 1
+
+    # res = (a.mat + conv.mat) * gfu.vec
+    # drag_x_vals.append(InnerProduct(res, drag_x_test.vec) )
+    # drag_y_vals.append(InnerProduct(res, drag_y_test.vec) )
+    # time_vals.append(t)
+
+    if cnt % 100 == 0:
+        gfut.AddMultiDimComponent(gfu.vec)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+t= 0.999000000000000876
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>Draw (gfut.components[0], mesh, interpolate_multidim=True, animate=True,
+      min=0, max=1.9, autoscale=False, vectors = True)
+Draw (gfut.components[1], mesh, interpolate_multidim=True, animate=True,
+      min=-0.5, max=1, autoscale=False)
+
+# Plot drag force over time
+plt.plot(time_vals, drag_x_vals)
+plt.xlabel(&#39;time&#39;); plt.ylabel(&#39;drag&#39;); plt.title(&#39;drag&#39;); plt.grid(True)
+plt.show()
+# Plot lift force over time
+plt.plot(time_vals, drag_y_vals)
+plt.xlabel(&#39;time&#39;); plt.ylabel(&#39;lift&#39;); plt.title(&#39;lift&#39;); plt.grid(True)
+plt.show()
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "a0cbe79593d849c0ad5c70e88b1b4491", "version_major": 2, "version_minor": 0}</script></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "84e52583c16c4f858a4a77e61ed05652", "version_major": 2, "version_minor": 0}</script></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_Flow_around_a_cylinder_35_2.png" src="../_images/notebooks_Flow_around_a_cylinder_35_2.png" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_Flow_around_a_cylinder_35_3.png" src="../_images/notebooks_Flow_around_a_cylinder_35_3.png" />
+</div>
+</div>
+</section>
+<section id="4.2-增量形式">
+<h2>4.2 增量形式<a class="headerlink" href="#4.2-增量形式" title="Link to this heading"></a></h2>
+<p>在增量格式中，如采用显式对流–隐式扩散结构（参考 Section~:nbsphinx-math:<cite>ref{subsec:bdf1-assembly}</cite> 的增量推进格式），速度更新形式为：</p>
+<div class="math notranslate nohighlight">
+\[\mathbf{u}^{n+1} = \mathbf{u}^{n} + \delta\mathbf{u}^{n+1},\]</div>
+<p>其中 <span class="math notranslate nohighlight">\(\delta \mathbf{u}^{n+1}\)</span> 为当前步的速度增量。此时，边界条件 <span class="math notranslate nohighlight">\(\mathbf{u}^{n+1} = \mathbf{g}\)</span> 被改写为：</p>
+<div class="math notranslate nohighlight">
+\[\delta \mathbf{u}^{n+1} = \mathbf{g} - \mathbf{u}^{n} \quad \text{on } \partial\Omega_D.\]</div>
+<p>因此，在构造增量形式下的系统时，只需将边界值 <span class="math notranslate nohighlight">\(\mathbf{g}\)</span> 替换为 <span class="math notranslate nohighlight">\(\mathbf{g} - \mathbf{u}^{n}\)</span>，即可保证增量项满足新的 Dirichlet 条件。</p>
+<p>数值实现中，一般先构造上一时刻插值 <span class="math notranslate nohighlight">\(\mathbf{u}^{n}\)</span>，再计算差值：</p>
+<p>与全量系统处理方式一致，增量式下 lifting 同样以修正右端项为主，系统矩阵结构不受影响。</p>
+<p>该策略不仅适用于 Navier–Stokes，也适用于带非齐次边界条件的任意双线性时间推进系统。</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>mstar = BilinearForm(X)
+mstar += InnerProduct(u,v)*dx + dt*stokes
+mstar.Assemble()
+inv = mstar.mat.Inverse(X.FreeDofs())
+
+conv = BilinearForm(X, nonassemble = True)
+conv += (Grad(u) * u) * v * dx
+
+gfut = GridFunction(gfu.space,multidim=0)
+time_vals, drag_x_vals, drag_y_vals = [],[],[]
+
 gfut.AddMultiDimComponent(gfu.vec)
 t = 0; cnt = 0
 while t &lt; tend-0.5*dt:
@@ -175,24 +623,10 @@ while t &lt; tend-0.5*dt:
 
     if cnt % 100 == 0:
         gfut.AddMultiDimComponent(gfu.vec)
-
-# Draw (gfut.components[0], mesh, interpolate_multidim=True, animate=True,
-#       min=0, max=1.9, autoscale=False, vectors = True)
-# Draw (gfut.components[1], mesh, interpolate_multidim=True, animate=True,
-#       min=-0.5, max=1, autoscale=False)
-
-# Plot drag force over time
-plt.plot(time_vals, drag_x_vals)
-plt.xlabel(&#39;time&#39;); plt.ylabel(&#39;drag&#39;); plt.title(&#39;drag&#39;); plt.grid(True)
-plt.show()
-# Plot lift force over time
-plt.plot(time_vals, drag_y_vals)
-plt.xlabel(&#39;time&#39;); plt.ylabel(&#39;lift&#39;); plt.title(&#39;lift&#39;); plt.grid(True)
-plt.show()
 </pre></div>
 </div>
 </div>
-<div class="nboutput docutils container">
+<div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
@@ -200,337 +634,15 @@ plt.show()
 t= 24.99900000000757776
 </pre></div></div>
 </div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<img alt="../_images/notebooks_Flow_around_a_cylinder_0_1.png" src="../_images/notebooks_Flow_around_a_cylinder_0_1.png" />
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<img alt="../_images/notebooks_Flow_around_a_cylinder_0_2.png" src="../_images/notebooks_Flow_around_a_cylinder_0_2.png" />
-</div>
-</div>
+<p>动态图及drag-lift图像绘制（可选，若网格较细，动态图绘制可能对电脑造成较大负担）</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># 计算 drag 和 lift 的统计量
-drag_max = np.max(drag_x_vals)
-drag_min = np.min(drag_x_vals)
-drag_mean = np.mean(drag_x_vals)
-
-lift_max = np.max(drag_y_vals)
-lift_min = np.min(drag_y_vals)
-lift_mean = np.mean(drag_y_vals)
-
-# 打印结果
-print(f&quot;Drag: max = {drag_max:.6f}, min = {drag_min:.6f}, mean = {drag_mean:.6f}&quot;)
-print(f&quot;Lift: max = {lift_max:.6f}, min = {lift_min:.6f}, mean = {lift_mean:.6f}&quot;)
-</pre></div>
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-Drag: max = 3.253640, min = 0.643937, mean = 2.979642
-Lift: max = 0.850045, min = -1.137753, mean = -0.142434
-</pre></div></div>
-</div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[48]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># import libarries, define geometry and generate mesh
-from ngsolve import *
-from ngsolve.webgui import Draw
-from netgen.occ import *
-from netgen.webgui import Draw as DrawGeo
-shape = Rectangle(2,0.41).Circle(0.2,0.2,0.05).Reverse().Face()
-shape.edges.name=&quot;cyl&quot;
-shape.edges.Min(X).name=&quot;inlet&quot;
-shape.edges.Max(X).name=&quot;outlet&quot;
-shape.edges.Min(Y).name=&quot;wall&quot;
-shape.edges.Max(Y).name=&quot;wall&quot;
-mesh = Mesh(OCCGeometry(shape, dim=2).GenerateMesh(maxh=1/8)).Curve(3)
-
-# viscosity
-nu = 0.001
-
-k = 3
-V = VectorH1(mesh,order=k, dirichlet=&quot;wall|cyl|inlet&quot;)
-Q = H1(mesh,order=k-1)
-X = V*Q
-
-gfu = GridFunction(X)
-gfu_D = GridFunction(X)
-velocity, pressure = gfu.components
-velocity_D, pressure_D = gfu_D.components
-# parabolic inflow at bc=1:
-uin = CoefficientFunction((1.5*4*y*(0.41-y)/(0.41*0.41),0))
-velocity_D.Set(uin, definedon=mesh.Boundaries(&quot;inlet&quot;))
-
-# Draw(velocity,mesh,&quot;u&quot;)
-# Draw(pressure,mesh,&quot;p&quot;)
-
-(u,p), (v,q) = X.TnT()
-
-a = BilinearForm(X)
-stokes = (nu*InnerProduct(grad(u),grad(v))-div(u)*q-div(v)*p)*dx
-a += stokes
-a.Assemble()
-f = LinearForm(X)
-f.Assemble()
-
-res = f.vec - a.mat*gfu_D.vec
-inv_stokes = a.mat.Inverse(X.FreeDofs())
-gfu.vec.data = gfu_D.vec + inv_stokes * res
-
-# Draw(velocity,mesh,&quot;u&quot;)
-
-dt = 0.001
-mstar = BilinearForm(X)
-mstar += InnerProduct(u,v)*dx + dt*stokes
-mstar.Assemble()
-inv = mstar.mat.Inverse(X.FreeDofs())
-
-conv = BilinearForm(X, nonassemble = True)
-conv += InnerProduct(u,v)*dx - dt * (Grad(u) * u) * v * dx
-
-tend = 0
-gfut = GridFunction(gfu.space,multidim=0)
-
-tend += 1
-gfut.AddMultiDimComponent(gfu.vec)
-t = 0; cnt = 0
-while t &lt; tend-0.5*dt:
-    print (&quot;\rt=&quot;, t, end=&quot;&quot;)
-
-    conv.Assemble()
-    res = conv.mat * gfu.vec - mstar.mat * gfu_D.vec
-    gfu.vec.data = gfu_D.vec + inv * res
-
-    t = t + dt; cnt += 1
-    mean_p = Integrate(pressure, mesh)
-    domain_vol = Integrate(1, mesh)
-    mean_val = mean_p / domain_vol
-
-    # 2. 创建 offset 向量
-    ones = pressure.vec.CreateVector()
-    ones[:] = 1.0
-    offset = mean_val * ones
-
-    # 3. 减去 offset，实现零均值
-    pressure.vec.data -= offset
-    if cnt % 50 == 0:
-        gfut.AddMultiDimComponent(gfu.vec)
-
-Draw (gfut.components[0], mesh, interpolate_multidim=True, animate=True,
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>Draw (gfut.components[0], mesh, interpolate_multidim=True, animate=True,
       min=0, max=1.9, autoscale=False, vectors = True)
 Draw (gfut.components[1], mesh, interpolate_multidim=True, animate=True,
       min=-0.5, max=1, autoscale=False)
-</pre></div>
-</div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "8bc651586a8b43a4aef3fe99e5808602", "version_major": 2, "version_minor": 0}</script></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-t= 0.999000000000000876
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "04372e6254ec4632b15932b568a6f158", "version_major": 2, "version_minor": 0}</script></div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[48]:
-</pre></div>
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-BaseWebGuiScene
-</pre></div></div>
-</div>
-<section id="1.-增量形式圆柱绕流">
-<h1>1. 增量形式圆柱绕流<a class="headerlink" href="#1.-增量形式圆柱绕流" title="Link to this heading"></a></h1>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>from ngsolve import *
-from ngsolve.webgui import Draw
-from netgen.occ import *
-from netgen.webgui import Draw as DrawGeo
-import matplotlib
-import numpy as np
-import matplotlib.pyplot as plt
-
-shape = Rectangle(2.2,0.41).Circle(0.2,0.2,0.05).Reverse().Face()  # 先绘制一个矩形，再在(0.2,0.2)位置绘制圆，并Reverse使其为interface
-shape.edges.name = &quot;cyl&quot; # 圆形表面
-shape.edges.Max(X).name = &quot;outlet&quot;
-shape.edges.Min(X).name = &quot;inlet&quot;
-shape.edges.Max(Y).name = &quot;wall&quot;
-shape.edges.Min(Y).name = &quot;wall&quot;
-mesh = Mesh(OCCGeometry(shape, dim=2).GenerateMesh(maxh = 1/32)).Curve(3) # 三阶多项式拟合曲线
-# n = specialcf.normal(mesh.dim)
-n  = specialcf.normal(mesh.dim)        # 外法向
-Id = Id(mesh.dim)                       # 单位张量  (或  Id(2)  )
-rho = 1                                 # ρ=1 已隐含在 ν 里
-D   = 0.1                               # 圆柱直径（用来算系数）
-Uref = 1.5                              # 入口平均速度
-# # 绘制物理域及计算域
-# DrawGeo(shape);
-# Draw(mesh); # OCCGeometry会根据绘制图像复杂性生成不同粗细的网格拟合（如圆附近网格会更细）
-
-nu = 0.001
-k = 3 # 空间阶数
-dt = 0.001 # 定义时间步长
-t = 0
-i = 0
-time_vals, drag_x_vals, drag_y_vals = [],[],[]
-
-V = VectorH1(mesh, order = k, dirichlet = &quot;wall|cyl|inlet&quot;)
-Q = H1(mesh, order = k-1) # 未指明的边界默认为自然边界条件（在弱形式中会体现为零Neumann边界条件）
-X = V * Q # 定义速度场与压力场的耦合空间
-
-gfu = GridFunction(X) # 设置GridFunction作为解域，用于存储解作为后续初值使用
-velocity, pressure = gfu.components # X由V，P组成，gfu.components即为[V，P]
-uin = CF((1.5*4*y*(0.41-y)/(0.41**2),0)) # CF为系数矩阵
-velocity.Set(uin, definedon = mesh.Boundaries(&quot;inlet&quot;))
-
-# gfu_D.vec.data.FV().NumPy()[X.FreeDofs()] = 0
-
-drag_x_test = GridFunction(X)
-drag_x_test.components[0].Set(CoefficientFunction((-20.0,0)), definedon=mesh.Boundaries(&quot;cyl&quot;))
-drag_y_test = GridFunction(X)
-drag_y_test.components[0].Set(CoefficientFunction((0,-20.0)), definedon=mesh.Boundaries(&quot;cyl&quot;))
-
-# # 分别绘制速度场和压力场处置
-# Draw(velocity);
-# Draw(pressure);
-
-# 设置Trial和Test函数
-(u,p),(v,q) = X.TnT()
-
-a = BilinearForm((nu*InnerProduct(grad(u),grad(v)) - div(v)*p - div(u)*q)*dx).Assemble()
-f = LinearForm(X).Assemble() # 默认为0
-
-res = f.vec - a.mat * gfu.vec
-inv_stokes = a.mat.Inverse(X.FreeDofs())
-gfu.vec.data += inv_stokes * res
-
-# # 绘制stokes的解（NS的初值）
-# sceneu = Draw(velocity,mesh,&quot;u&quot;)
-# scenep = Draw(pressure,mesh,&quot;p&quot;)
-
-mstar = BilinearForm((InnerProduct(u, v) + dt * (nu * InnerProduct(grad(u),grad(v)) - div(v) * p - div(u) * q)) * dx).Assemble()
-inv = mstar.mat.Inverse(X.FreeDofs())
-r1 = BilinearForm(X, nonassemble = True)
-r1 += dt * (- ((Grad(u) * u) * v)) * dx
-r2 = BilinearForm(dt * (InnerProduct(u, v) * dx)).Assemble()
-r3 = BilinearForm(- dt * (nu * InnerProduct(grad(u),grad(v)) - div(v) * p - div(u) * q) * dx).Assemble()
-f = LinearForm(X).Assemble()
-conv = BilinearForm(X, nonassemble = True)
-conv += (((Grad(u) * u) * v)) * dx
-
-t = 0
-i = 0
-tend = 5
-gfut = GridFunction(gfu.space,multidim = 0)
-gfut.AddMultiDimComponent(gfu.vec)
-gfu1 = GridFunction(X)
-gfu2 = GridFunction(X)
-gfu3 = GridFunction(X)
-
-while t &lt; tend - 0.5 * dt:
-    print (&quot;\rt=&quot;, t, end=&quot;&quot;)
-    r1.Assemble()
-    conv.Assemble()
-    f.vec.data = r1.mat * gfu.vec
-    gfu1.vec.data = inv * f.vec
-
-    f.vec.data = r2.mat * gfu.vec
-    gfu2.vec.data = inv * f.vec
-
-    f.vec.data = r3.mat * gfu.vec
-    # f.vec.data = r3.mat * gfu.vec - dt * a.mat * gfu_D.vec
-    gfu3.vec.data = gfu.vec + inv * f.vec
-
-    # 当前速度
-    velocity = gfu.components[0]
-    velocity1 = gfu1.components[0]
-    velocity2 = gfu2.components[0]
-    velocity3 = gfu3.components[0]
-
-    # 构造 F(uⁿ) = (u · ∇)u
-    du = grad(velocity)
-    F_un = CoefficientFunction((
-        velocity[0]*du[0,0] + velocity[1]*du[0,1],
-        velocity[0]*du[1,0] + velocity[1]*du[1,1]
-    ))
-    F_u = GridFunction(X)
-    conv_u = F_u.components[0]
-    conv_u.Set(F_un)
-
-    # 计算每个项
-    a11 = Integrate(InnerProduct(velocity, velocity), mesh) - Integrate(InnerProduct(velocity, velocity1), mesh)
-    a12 = - Integrate(InnerProduct(velocity, velocity2), mesh)
-    a21 = - Integrate(InnerProduct(F_un, velocity1), mesh)
-    a22 = Integrate(InnerProduct(velocity, velocity), mesh) - Integrate(InnerProduct(F_un, velocity2), mesh)
-    b1  = Integrate(InnerProduct(velocity, velocity3), mesh)
-    b2  = Integrate(InnerProduct(F_un, velocity3), mesh) - Integrate(0.5 * InnerProduct(velocity, velocity) * InnerProduct(velocity, n), mesh, BND)
-    # b2  = InnerProduct(conv_u.vec, velocity3.vec)
-    # print(a11,a12,a21,a22)
-    # print(b1,b2)
-
-    alpha = (b1 * a22 - a12 * b2) / (a11 * a22 - a12 * a21)
-    beta = (a11 * b2 - b1 * a21) / (a11 * a22 - a12 * a21)
-    # print()
-    # print(alpha, beta)
-    # break
-    gfu.vec.data = alpha * gfu1.vec + beta * gfu2.vec + gfu3.vec
-
-    mean_p = Integrate(pressure, mesh)
-    domain_vol = Integrate(1, mesh)
-    mean_val = mean_p / domain_vol
-
-    # 2. 创建 offset 向量
-    ones = pressure.vec.CreateVector()
-    ones[:] = 1.0
-    offset = mean_val * ones
-
-    # 3. 减去 offset，实现零均值
-    pressure.vec.data -= offset
-
-    t = t + dt
-    i += 1
-
-    res = (a.mat + conv.mat) * gfu.vec
-    drag_x_vals.append(InnerProduct(res, drag_x_test.vec) )
-    drag_y_vals.append(InnerProduct(res, drag_y_test.vec) )
-    time_vals.append(t)
-
-    if i % 100 == 0:
-        gfut.AddMultiDimComponent(gfu.vec)
-print()
-print(InnerProduct(res, drag_x_test.vec),InnerProduct(res, drag_y_test.vec))
-# Draw (gfut.components[0], mesh, interpolate_multidim=True, animate=True, autoscale=False, vectors = True);
-# Draw (gfut.components[1], mesh, interpolate_multidim=True, animate=True, autoscale=False);
 
 # Plot drag force over time
 plt.plot(time_vals, drag_x_vals)
@@ -547,27 +659,43 @@ plt.show()
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<div class="highlight"><pre>
-t= 4.999000000000004676
-3.151432411900075 0.6224979121928095
-</pre></div></div>
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "dc9fc30eec864d25b3514171309dea87", "version_major": 2, "version_minor": 0}</script></div>
 </div>
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/notebooks_Flow_around_a_cylinder_4_1.png" src="../_images/notebooks_Flow_around_a_cylinder_4_1.png" />
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "aa6b12060b4c480684d99e8aa50b86c7", "version_major": 2, "version_minor": 0}</script></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_Flow_around_a_cylinder_39_2.png" src="../_images/notebooks_Flow_around_a_cylinder_39_2.png" />
 </div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/notebooks_Flow_around_a_cylinder_4_2.png" src="../_images/notebooks_Flow_around_a_cylinder_4_2.png" />
+<img alt="../_images/notebooks_Flow_around_a_cylinder_39_3.png" src="../_images/notebooks_Flow_around_a_cylinder_39_3.png" />
 </div>
 </div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+<p>内容保存（使用paraview进行图像可视化）</p>
+</section>
+</section>
+<section id="5.-结果输出与可视化准备（Postprocessing-and-Visualization-Setup）">
+<h1>5. 结果输出与可视化准备（Postprocessing and Visualization Setup）<a class="headerlink" href="#5.-结果输出与可视化准备（Postprocessing-and-Visualization-Setup）" title="Link to this heading"></a></h1>
+<p>数值模拟完成后，我们对所得解进行保存与可视化，主要包括两类数据：</p>
+<ul class="simple">
+<li><p>时间演化过程中<strong>阻力与升力的变化曲线</strong>；</p></li>
+<li><p>多帧速度与压强场的导出，用于可视化（如 Paraview）。</p></li>
+</ul>
+<p>我们将时间、<span class="math notranslate nohighlight">\(x\)</span> 方向阻力（drag）与 <span class="math notranslate nohighlight">\(y\)</span> 方向升力（lift）保存为 <code class="docutils literal notranslate"><span class="pre">.npz</span></code> 格式，便于后续分析或绘图。</p>
+<p>为实现时序数据的三维可视化，我们还将解序列中的速度与压强分别导出为 VTK 文件。由于 NGSolve 是二维计算域，为满足 VTK 三维向量格式要求，需将速度向量补全为 <span class="math notranslate nohighlight">\((u, v, 0)\)</span>：</p>
+<p>最终，在 <code class="docutils literal notranslate"><span class="pre">ouputdir/Cylinder_Incremention_BDF1/</span></code> 目录下，将生成多个 <code class="docutils literal notranslate"><span class="pre">.vtu</span></code> 文件，供后续使用 Paraview 等工具进行可视化展示和动画制作。</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import numpy as np
@@ -576,7 +704,7 @@ np.savez(&#39;cylinder_drag_lift.npz&#39;, time=time_vals, drag=drag_x_vals, lif
 
 import os
 
-outdir = r&quot;E:\seminar\ouputdir\Cylinder_Incremention_BDF1&quot;
+outdir = r&quot;.\ouputdir\Cylinder_Incremention_BDF1&quot;
 os.makedirs(outdir, exist_ok=True)  # 自动创建目录
 file_path = os.path.join(outdir, &quot;1000_8_1000&quot;)
 vel_cf = CoefficientFunction((
@@ -601,2231 +729,6 @@ for i in range(nframes):
     gfu.vec.data = gfut.vecs[i]  # 恢复到第i帧
     outname = vtkout.Do(time=i)
 print(&quot;已写出：&quot;, outname)
-# 加载方式
-# data = np.load(&#39;cylinder_drag_lift.npz&#39;)
-# drag = data[&#39;drag&#39;]
-# lift = data[&#39;lift&#39;]
-</pre></div>
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-已写出： E:\seminar\ouputdir\Cylinder_Incremention_BDF1\1000_8_1000_step00250
-</pre></div></div>
-</div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import numpy as np
-
-# 加载数据
-data = np.load(&#39;cylinder_drag_lift.npz&#39;)
-
-# 提取数组
-time = data[&#39;time&#39;]
-drag = data[&#39;drag&#39;]
-lift = data[&#39;lift&#39;]
-
-# 计算 drag 和 lift 的统计量
-drag_max = np.max(drag)
-drag_min = np.min(drag)
-drag_mean = np.mean(drag)
-
-lift_max = np.max(lift)
-lift_min = np.min(lift)
-lift_mean = np.mean(lift)
-
-# 打印结果
-print(f&quot;Drag: max = {drag_max:.6f}, min = {drag_min:.6f}, mean = {drag_mean:.6f}&quot;)
-print(f&quot;Lift: max = {lift_max:.6f}, min = {lift_min:.6f}, mean = {lift_mean:.6f}&quot;)
-<br/></pre></div>
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-Drag: max = 3.253862, min = 0.646143, mean = 2.982733
-Lift: max = 0.828096, min = -1.113845, mean = -0.140874
-</pre></div></div>
-</div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import numpy as np
-
-# 载入保存的数据
-data = np.load(&#39;cylinder_drag_lift.npz&#39;)
-time = data[&#39;time&#39;]
-drag = data[&#39;drag&#39;]
-lift = data[&#39;lift&#39;]
-
-# 选取稳定的时间段 t ∈ [8, 25]
-mask = (time &gt;= 8.0) &amp; (time &lt;= 25.0)
-drag_stable = drag[mask]
-lift_stable = lift[mask]
-
-# 计算统计量
-drag_min = np.min(drag_stable)
-drag_max = np.max(drag_stable)
-drag_mean = np.mean(drag_stable)
-
-lift_min = np.min(lift_stable)
-lift_max = np.max(lift_stable)
-lift_mean = np.mean(lift_stable)
-
-# 输出结果
-print(f&quot;Drag: max = {drag_max:.6f}, min = {drag_min:.6f}, mean = {drag_mean:.6f}&quot;)
-print(f&quot;Lift: max = {lift_max:.6f}, min = {lift_min:.6f}, mean = {lift_mean:.6f}&quot;)
-<br/></pre></div>
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-Drag: max = 3.034300, min = 2.943587, mean = 2.991235
-Lift: max = 0.828096, min = -1.113845, mean = -0.140461
-</pre></div></div>
-</div>
-<section id="1.1-CN1">
-<h2>1.1 CN1<a class="headerlink" href="#1.1-CN1" title="Link to this heading"></a></h2>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>from ngsolve import *
-from ngsolve.webgui import Draw
-from netgen.occ import *
-from netgen.webgui import Draw as DrawGeo
-import matplotlib
-import numpy as np
-import matplotlib.pyplot as plt
-
-shape = Rectangle(2.2,0.41).Circle(0.2,0.2,0.05).Reverse().Face()  # 先绘制一个矩形，再在(0.2,0.2)位置绘制圆，并Reverse使其为interface
-shape.edges.name = &quot;cyl&quot; # 圆形表面
-shape.edges.Max(X).name = &quot;outlet&quot;
-shape.edges.Min(X).name = &quot;inlet&quot;
-shape.edges.Max(Y).name = &quot;wall&quot;
-shape.edges.Min(Y).name = &quot;wall&quot;
-mesh = Mesh(OCCGeometry(shape, dim=2).GenerateMesh(maxh = 1/8)).Curve(3) # 三阶多项式拟合曲线
-# n = specialcf.normal(mesh.dim)
-n  = specialcf.normal(mesh.dim)        # 外法向
-Id = Id(mesh.dim)                       # 单位张量  (或  Id(2)  )
-rho = 1                                 # ρ=1 已隐含在 ν 里
-D   = 0.1                               # 圆柱直径（用来算系数）
-Uref = 1.5                              # 入口平均速度
-
-# # 绘制物理域及计算域
-# DrawGeo(shape);
-# Draw(mesh); # OCCGeometry会根据绘制图像复杂性生成不同粗细的网格拟合（如圆附近网格会更细）
-
-nu = 0.001
-k = 3 # 空间阶数
-dt = 0.001 # 定义时间步长
-t = 0
-i = 0
-time_vals, drag_x_vals, drag_y_vals = [],[],[]
-
-V = VectorH1(mesh, order = k, dirichlet = &quot;wall|cyl|inlet&quot;)
-Q = H1(mesh, order = k-1) # 未指明的边界默认为自然边界条件（在弱形式中会体现为零Neumann边界条件）
-X = V * Q # 定义速度场与压力场的耦合空间
-
-gfu = GridFunction(X) # 设置GridFunction作为解域，用于存储解作为后续初值使用
-velocity, pressure = gfu.components # X由V，P组成，gfu.components即为[V，P]
-uin = CF((4*y*(0.41-y)/(0.41**2),0)) # CF为系数矩阵
-velocity.Set(uin, definedon = mesh.Boundaries(&quot;inlet&quot;))
-
-def F(u):
-    # 任意你需要的表达式
-    velocity = u.components[0]
-    return exp(velocity) + sin(velocity)
-
-# gfu_D.vec.data.FV().NumPy()[X.FreeDofs()] = 0
-
-drag_x_test = GridFunction(X)
-drag_x_test.components[0].Set(CoefficientFunction((-20.0,0)), definedon=mesh.Boundaries(&quot;cyl&quot;))
-drag_y_test = GridFunction(X)
-drag_y_test.components[0].Set(CoefficientFunction((0,-20.0)), definedon=mesh.Boundaries(&quot;cyl&quot;))
-
-# # 分别绘制速度场和压力场处置
-# Draw(velocity);
-# Draw(pressure);
-
-# 设置Trial和Test函数
-(u,p),(v,q) = X.TnT()
-
-a = BilinearForm((nu*InnerProduct(grad(u),grad(v)) - div(v)*p - div(u)*q)*dx).Assemble()
-f = LinearForm(X).Assemble() # 默认为0
-
-res = f.vec - a.mat * gfu.vec
-inv_stokes = a.mat.Inverse(X.FreeDofs())
-gfu.vec.data += inv_stokes * res
-
-# # 绘制stokes的解（NS的初值）
-# sceneu = Draw(velocity,mesh,&quot;u&quot;)
-# scenep = Draw(pressure,mesh,&quot;p&quot;)
-
-mstar = BilinearForm((2*InnerProduct(u, v) + dt * (nu * InnerProduct(grad(u),grad(v)) - div(v) * p - div(u) * q)) * dx).Assemble()
-inv = mstar.mat.Inverse(X.FreeDofs())
-r1 = BilinearForm(X, nonassemble = True)
-r1 += dt * (- ((Grad(u) * u) * v)) * dx
-f_expr = F(gfu)
-r2 = LinearForm(dt * (InnerProduct(f_expr, v) * dx)).Assemble()
-r3 = BilinearForm(- dt * (nu * InnerProduct(grad(u),grad(v)) - div(v) * p - div(u) * q) * dx).Assemble()
-f = LinearForm(X).Assemble()
-Fu = GridFunction(X)
-
-t = 0
-i = 0
-tend = 1
-gfut = GridFunction(gfu.space,multidim = 0)
-gfut.AddMultiDimComponent(gfu.vec)
-gfu1 = GridFunction(X)
-gfu2 = GridFunction(X)
-gfu3 = GridFunction(X)
-gfu_old = GridFunction(X)
-
-while t &lt; tend - 0.5 * dt:
-    print (&quot;\rt=&quot;, t, end=&quot;&quot;)
-    r1.Assemble()
-    f.vec.data = r1.mat * gfu.vec
-    gfu1.vec.data = inv * f.vec
-
-    # velocityu = Fu.components[0]
-    # velocityu.Set(1/gfu.components[0])
-    f.vec.data = r2.vec
-    gfu2.vec.data = inv * f.vec
-
-    f.vec.data = r3.mat * gfu.vec
-    # f.vec.data = r3.mat * gfu.vec - dt * a.mat * gfu_D.vec
-    gfu3.vec.data = gfu.vec + inv * f.vec
-
-    # 当前速度
-    velocity1 = gfu1.components[0]
-    velocity2 = gfu2.components[0]
-    velocity3 = gfu3.components[0]
-
-    # 构造 F(uⁿ) = (u · ∇)u
-    du = grad(velocity)
-    F_un = CoefficientFunction((
-        velocity[0]*du[0,0] + velocity[1]*du[0,1],
-        velocity[0]*du[1,0] + velocity[1]*du[1,1]
-    ))
-    F_u = GridFunction(X)
-    conv_u = F_u.components[0]
-    conv_u.Set(F_un)
-
-    # velocityu.Set(1/gfu.components[0])
-    # 计算每个项
-    a11 = Integrate(InnerProduct(F(gfu), velocity), mesh) - Integrate(InnerProduct(F(gfu), velocity1), mesh)
-    a12 = - Integrate(InnerProduct(F(gfu), velocity2), mesh)
-    a21 = - Integrate(InnerProduct(F_un, velocity1), mesh)
-    a22 = Integrate(InnerProduct(F(gfu), velocity), mesh) - Integrate(InnerProduct(F_un, velocity2), mesh)
-    b1  = Integrate(InnerProduct(F(gfu), velocity3), mesh)
-    b2  = Integrate(InnerProduct(F_un, velocity3), mesh) - Integrate(0.5 * InnerProduct(velocity, velocity) * InnerProduct(velocity, n), mesh, BND)
-    # b2  = InnerProduct(conv_u.vec, velocity3.vec)
-    # print(a11,a12,a21,a22)
-    # print(b1,b2)
-
-    alpha = (b1 * a22 - a12 * b2) / (a11 * a22 - a12 * a21)
-    beta = (a11 * b2 - b1 * a21) / (a11 * a22 - a12 * a21)
-    # print()
-    # print(alpha, beta)
-    # break
-    gfu_old.vec.data = gfu.vec
-    gfu_mid.vec.data = alpha * gfu1.vec + beta * gfu2.vec + gfu3.vec
-    gfu.vec.data = 2*gfu_mid.vec - gfu_old.vec
-
-    mean_p = Integrate(pressure, mesh)
-    domain_vol = Integrate(1, mesh)
-    mean_val = mean_p / domain_vol
-
-    # 2. 创建 offset 向量
-    ones = pressure.vec.CreateVector()
-    ones[:] = 1.0
-    offset = mean_val * ones
-
-    # 3. 减去 offset，实现零均值
-    pressure.vec.data -= offset
-
-    t = t + dt
-    i += 1
-
-    grad_v  = Grad(velocity)              # ∇u
-    strain  = grad_v + grad_v.trans       # (∇u + ∇uᵀ)
-    traction = -pressure * n + nu * (strain * n)   # σ·n
-
-    FD = Integrate(traction[0], mesh,
-                   definedon=mesh.Boundaries(&quot;cyl&quot;))   # 拖曳力
-    FL = Integrate(traction[1], mesh,
-                   definedon=mesh.Boundaries(&quot;cyl&quot;))   # 升力
-
-    drag_x_vals.append(FD)
-    drag_y_vals.append(FL)
-    time_vals.append(t)
-
-    if i % 100 == 0:
-        gfut.AddMultiDimComponent(gfu.vec)
-
-Draw (gfut.components[0], mesh, interpolate_multidim=True, animate=True, autoscale=False, vectors = True);
-Draw (gfut.components[1], mesh, interpolate_multidim=True, animate=True, autoscale=False);
-
-# Plot drag force over time
-plt.plot(time_vals, drag_x_vals)
-plt.xlabel(&#39;time&#39;); plt.ylabel(&#39;drag&#39;); plt.title(&#39;drag&#39;); plt.grid(True)
-plt.show()
-# Plot lift force over time
-plt.plot(time_vals, drag_y_vals)
-plt.xlabel(&#39;time&#39;); plt.ylabel(&#39;lift&#39;); plt.title(&#39;lift&#39;); plt.grid(True)
-plt.show()
-</pre></div>
-</div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-t= 0.999000000000000876
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "041044435ad74615bae6190154b9b943", "version_major": 2, "version_minor": 0}</script></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "f58fd321fd2c42deb5f8926ed4520865", "version_major": 2, "version_minor": 0}</script></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<img alt="../_images/notebooks_Flow_around_a_cylinder_9_3.png" src="../_images/notebooks_Flow_around_a_cylinder_9_3.png" />
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<img alt="../_images/notebooks_Flow_around_a_cylinder_9_4.png" src="../_images/notebooks_Flow_around_a_cylinder_9_4.png" />
-</div>
-</div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>from ngsolve import *
-from ngsolve.webgui import Draw
-
-mesh = Mesh(unit_square.GenerateMesh(maxh=0.2))
-V1 = H1(mesh, order=2)
-V2 = H1(mesh, order=2)
-V = FESpace([V1, V2])
-gfu = GridFunction(V)
-
-# 只操作第一个分量
-gfu1 = GridFunction(V1)
-gfu1.Set(1/gfu.components[0])
-Draw(gfu1)
-Draw(gfu.components[0])
-</pre></div>
-</div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "b9a433ea571141a3996f8ed35143c480", "version_major": 2, "version_minor": 0}</script></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "0ef9cf5e9dab444c8198a951be14cc51", "version_major": 2, "version_minor": 0}</script></div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
-</pre></div>
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-BaseWebGuiScene
-</pre></div></div>
-</div>
-</section>
-</section>
-<section id="2.-一般形式圆柱绕流BDF1">
-<h1>2. 一般形式圆柱绕流BDF1<a class="headerlink" href="#2.-一般形式圆柱绕流BDF1" title="Link to this heading"></a></h1>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>from ngsolve import *
-from ngsolve.webgui import Draw
-from netgen.occ import *
-from netgen.webgui import Draw as DrawGeo
-import matplotlib
-import numpy as np
-import matplotlib.pyplot as plt
-
-shape = Rectangle(2.2,0.41).Circle(0.2,0.2,0.05).Reverse().Face()  # 先绘制一个矩形，再在(0.2,0.2)位置绘制圆，并Reverse使其为interface
-shape.edges.name = &quot;cyl&quot; # 圆形表面
-shape.edges.Max(X).name = &quot;outlet&quot;
-shape.edges.Min(X).name = &quot;inlet&quot;
-shape.edges.Max(Y).name = &quot;wall&quot;
-shape.edges.Min(Y).name = &quot;wall&quot;
-mesh = Mesh(OCCGeometry(shape, dim=2).GenerateMesh(maxh = 1/8)).Curve(3) # 三阶多项式拟合曲线
-# n = specialcf.normal(mesh.dim)
-n  = specialcf.normal(mesh.dim)        # 外法向
-Id = Id(mesh.dim)                       # 单位张量  (或  Id(2)  )
-rho = 1                                 # ρ=1 已隐含在 ν 里
-D   = 0.1                               # 圆柱直径（用来算系数）
-Uref = 1.5                              # 入口平均速度
-
-# # 绘制物理域及计算域
-# DrawGeo(shape);
-# Draw(mesh); # OCCGeometry会根据绘制图像复杂性生成不同粗细的网格拟合（如圆附近网格会更细）
-
-nu = 1/1000
-k = 3 # 空间阶数
-dt = 0.001 # 定义时间步长
-t = 0
-i = 0
-time_vals, drag_x_vals, drag_y_vals = [],[],[]
-
-V = VectorH1(mesh, order = k, dirichlet = &quot;wall|cyl|inlet|outlet&quot;)
-Q = H1(mesh, order = k-1) # 未指明的边界默认为自然边界条件（在弱形式中会体现为零Neumann边界条件）
-X = V * Q # 定义速度场与压力场的耦合空间
-
-gfu = GridFunction(X) # 设置GridFunction作为解域，用于存储解作为后续初值使用
-gfuD = GridFunction(X)
-velocity, pressure = gfu.components # X由V，P组成，gfu.components即为[V，P]
-velocityD, pressureD = gfuD.components
-tau = Parameter(0.0)
-# uin = CF((sin(pi*tau/8)*6*y*(0.41-y)/(0.41**2),0)) # CF为系数矩阵
-uin = CF((6*y*(0.41-y)/(0.41**2),0)) # CF为系数矩阵
-velocityD.Set(uin, definedon = mesh.Boundaries(&quot;inlet|outlet&quot;))
-# velocity.Set(uin, definedon = mesh.Boundaries(&quot;inlet|outlet&quot;))
-# gfu_D.vec.data.FV().NumPy()[X.FreeDofs()] = 0
-
-drag_x_test = GridFunction(X)
-drag_x_test.components[0].Set(CoefficientFunction((-20.0,0)), definedon=mesh.Boundaries(&quot;cyl&quot;))
-drag_y_test = GridFunction(X)
-drag_y_test.components[0].Set(CoefficientFunction((0,-20.0)), definedon=mesh.Boundaries(&quot;cyl&quot;))
-
-# # 分别绘制速度场和压力场处置
-# Draw(velocity);
-# Draw(pressure);
-
-# 设置Trial和Test函数
-(u,p),(v,q) = X.TnT()
-
-a = BilinearForm((nu*InnerProduct(grad(u),grad(v)) - div(v)*p - div(u)*q)*dx).Assemble()
-f = LinearForm(X).Assemble() # 默认为0
-
-res = f.vec - a.mat * gfuD.vec
-inv_stokes = a.mat.Inverse(X.FreeDofs())
-gfu.vec.data = gfuD.vec + inv_stokes * res
-# Draw(velocity)
-# # 绘制stokes的解（NS的初值）
-# sceneu = Draw(velocity,mesh,&quot;u&quot;)
-# scenep = Draw(pressure,mesh,&quot;p&quot;)
-
-mstar = BilinearForm((InnerProduct(u, v) + dt * (nu * InnerProduct(grad(u),grad(v)) - div(v) * p - div(u) * q)) * dx).Assemble()
-inv = mstar.mat.Inverse(X.FreeDofs())
-# r1 = BilinearForm(X, nonassemble = True, symmetric=False)
-r1 = BilinearForm(X, nonassemble = True)
-r1 += dt * (- ((Grad(u) * u) * v)) * dx
-r2 = BilinearForm(dt * (InnerProduct(u, v) * dx)).Assemble()
-# r3 = BilinearForm(- dt * (nu * InnerProduct(grad(u),grad(v)) - div(v) * p - div(u) * q) * dx).Assemble()
-r3 = BilinearForm(InnerProduct(u, v) * dx).Assemble()
-f = LinearForm(X).Assemble()
-
-t = 0.0
-i = 0
-tend = 25
-gfut = GridFunction(gfu.space,multidim = 0)
-gfut.AddMultiDimComponent(gfu.vec)
-gfu1 = GridFunction(X)
-gfu2 = GridFunction(X)
-gfu3 = GridFunction(X)
-
-while t &lt; tend - 0.5 * dt:
-    print (&quot;\rt=&quot;, t, end=&quot;&quot;)
-    tau.Set(t)
-    velocityD.Set(uin, definedon = mesh.Boundaries(&quot;inlet|outlet&quot;))
-    r1.Assemble()
-
-    f.vec.data = r1.mat * gfu.vec
-    gfu1.vec.data = inv * f.vec
-
-    f.vec.data = r2.mat * gfu.vec
-    gfu2.vec.data = inv * f.vec
-
-    f.vec.data = r3.mat * gfu.vec - mstar.mat * gfuD.vec
-    gfu3.vec.data = gfuD.vec + inv * f.vec
-
-    # 当前速度
-    velocity = gfu.components[0]
-    velocity1 = gfu1.components[0]
-    velocity2 = gfu2.components[0]
-    velocity3 = gfu3.components[0]
-
-    # 构造 F(uⁿ) = (u · ∇)u
-    du = grad(velocity)
-    F_un = CoefficientFunction((
-        velocity[0]*du[0,0] + velocity[1]*du[0,1],
-        velocity[0]*du[1,0] + velocity[1]*du[1,1]
-    ))
-    F_u = GridFunction(X)
-    conv_u = F_u.components[0]
-    conv_u.Set(F_un)
-
-    # 计算每个项
-    a11 = Integrate(InnerProduct(velocity, velocity), mesh) - Integrate(InnerProduct(velocity, velocity1), mesh)
-    a12 = - Integrate(InnerProduct(velocity, velocity2), mesh)
-    a21 = - Integrate(InnerProduct(F_un, velocity1), mesh)
-    a22 = Integrate(InnerProduct(velocity, velocity), mesh) - Integrate(InnerProduct(F_un, velocity2), mesh)
-    b1  = Integrate(InnerProduct(velocity, velocity3), mesh)
-    b2  = Integrate(InnerProduct(F_un, velocity3), mesh) - Integrate(0.5 * InnerProduct(velocity, velocity) * InnerProduct(velocity, n), mesh, BND)
-    # b2  = InnerProduct(conv_u.vec, velocity3.vec)
-    # print(a11,a12,a21,a22)
-    # print(b1,b2)
-
-    alpha = (b1 * a22 - a12 * b2) / (a11 * a22 - a12 * a21)
-    beta = (a11 * b2 - b1 * a21) / (a11 * a22 - a12 * a21)
-    # print()
-    # print(alpha, beta)
-    # print()
-    # break
-    gfu.vec.data = alpha * gfu1.vec + beta * gfu2.vec + gfu3.vec
-
-    mean_p = Integrate(pressure, mesh)
-    domain_vol = Integrate(1, mesh)
-    mean_val = mean_p / domain_vol
-
-    # 2. 创建 offset 向量
-    ones = pressure.vec.CreateVector()
-    ones[:] = 1.0
-    offset = mean_val * ones
-
-    # 3. 减去 offset，实现零均值
-    pressure.vec.data -= offset
-
-    t = t + dt
-    i += 1
-    # Draw(velocity1)
-    # Draw(velocity2)
-    # Draw(velocity3)
-    # Draw(velocity)
-
-    # if i == 10:
-    #     break
-
-    grad_v  = Grad(velocity)              # ∇u
-    strain  = grad_v + grad_v.trans       # (∇u + ∇uᵀ)
-    traction = -pressure * n + nu * (strain * n)   # σ·n
-
-    FD = Integrate(traction[0], mesh,
-                   definedon=mesh.Boundaries(&quot;cyl&quot;))   # 拖曳力
-    FL = Integrate(traction[1], mesh,
-                   definedon=mesh.Boundaries(&quot;cyl&quot;))   # 升力
-
-    drag_x_vals.append(FD)
-    drag_y_vals.append(FL)
-    time_vals.append(t)                   # 或 t+dt, 看你想记录哪个时刻
-
-    if i % 50 == 0:
-        gfut.AddMultiDimComponent(gfu.vec)
-
-Draw (gfut.components[0], mesh, interpolate_multidim=True, animate=True, autoscale=False, vectors = True);
-# Draw (gfut.components[1], mesh, interpolate_multidim=True, animate=True, autoscale=False);
-
-# Plot drag force over time
-plt.plot(time_vals, drag_x_vals)
-plt.xlabel(&#39;time&#39;); plt.ylabel(&#39;drag&#39;); plt.title(&#39;drag&#39;); plt.grid(True)
-plt.show()
-# Plot lift force over time
-plt.plot(time_vals, drag_y_vals)
-plt.xlabel(&#39;time&#39;); plt.ylabel(&#39;lift&#39;); plt.title(&#39;lift&#39;); plt.grid(True)
-plt.show()
-</pre></div>
-</div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "552a8f80491c4ab4a6c55cd1e774e988", "version_major": 2, "version_minor": 0}</script></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-t= 4.999000000000004676
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "32c3aef8679f42e381ade1b6d4c2c4bb", "version_major": 2, "version_minor": 0}</script></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<img alt="../_images/notebooks_Flow_around_a_cylinder_12_3.png" src="../_images/notebooks_Flow_around_a_cylinder_12_3.png" />
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<img alt="../_images/notebooks_Flow_around_a_cylinder_12_4.png" src="../_images/notebooks_Flow_around_a_cylinder_12_4.png" />
-</div>
-</div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[29]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import os
-
-outdir = r&quot;E:\seminar\ouputdir\Cylinder_BDF1&quot;
-os.makedirs(outdir, exist_ok=True)  # 自动创建目录
-file_path = os.path.join(outdir, &quot;1000_8_1000&quot;)
-vtkout = VTKOutput(
-    mesh,
-    coefs = [gfu.components[0], gfu.components[1]],
-    names = [&quot;velocity&quot;, &quot;pressure&quot;],
-    filename = file_path,
-    subdivision = 2)
-
-nframes = len(gfut.vecs)  # 多帧数量
-
-for i in range(nframes):
-    # 提取第i帧的解
-    gfu.vec.data = gfut.vecs[i]  # 恢复到第i帧
-    outname = vtkout.Do(time=i)
-print(&quot;已写出：&quot;, outname)
-</pre></div>
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-已写出： E:\seminar\ouputdir\Cylinder_BDF1\1000_8_1000_step00100
-</pre></div></div>
-</div>
-</section>
-<section id="3.-一般形式圆柱绕流CN2">
-<h1>3. 一般形式圆柱绕流CN2<a class="headerlink" href="#3.-一般形式圆柱绕流CN2" title="Link to this heading"></a></h1>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>from ngsolve import *
-from ngsolve.webgui import Draw
-from netgen.occ import *
-from netgen.webgui import Draw as DrawGeo
-import matplotlib
-import numpy as np
-import matplotlib.pyplot as plt
-
-shape = Rectangle(2.2,0.41).Circle(0.2,0.2,0.05).Reverse().Face()  # 先绘制一个矩形，再在(0.2,0.2)位置绘制圆，并Reverse使其为interface
-shape.edges.name = &quot;cyl&quot; # 圆形表面
-shape.edges.Max(X).name = &quot;outlet&quot;
-shape.edges.Min(X).name = &quot;inlet&quot;
-shape.edges.Max(Y).name = &quot;wall&quot;
-shape.edges.Min(Y).name = &quot;wall&quot;
-mesh = Mesh(OCCGeometry(shape, dim=2).GenerateMesh(maxh = 1/8)).Curve(3) # 三阶多项式拟合曲线
-n  = specialcf.normal(mesh.dim)        # 外法向
-Id = Id(mesh.dim)                       # 单位张量  (或  Id(2)  )
-rho = 1                                 # ρ=1 已隐含在 ν 里
-D   = 0.1                               # 圆柱直径（用来算系数）
-Uref = 1.5                              # 入口平均速度
-
-# # 绘制物理域及计算域
-# DrawGeo(shape);
-# Draw(mesh); # OCCGeometry会根据绘制图像复杂性生成不同粗细的网格拟合（如圆附近网格会更细）
-
-nu = 0.001
-k = 3 # 空间阶数
-dt = 1/1000 # 定义时间步长
-t = 0
-i = 0
-time_vals, drag_x_vals, drag_y_vals = [],[],[]
-
-# V = VectorH1(mesh, order = k, dirichlet = &quot;wall|cyl|inlet|outlet&quot;)
-V = VectorH1(mesh, order = k, dirichlet = &quot;wall|cyl|inlet&quot;)
-Q = H1(mesh, order = k-1) # 未指明的边界默认为自然边界条件（在弱形式中会体现为零Neumann边界条件）
-X = V * Q # 定义速度场与压力场的耦合空间
-
-gfu = GridFunction(X) # 设置GridFunction作为解域，用于存储解作为后续初值使用
-gfu_mid = GridFunction(X)
-gfu_old = GridFunction(X)
-gfu_approximation = GridFunction(X)
-gfuD = GridFunction(X)
-velocity, pressure = gfu.components # X由V，P组成，gfu.components即为[V，P]
-velocityD, pressureD = gfuD.components
-# tau = Parameter(0.0)
-# uin = CF((sin(pi*tau/8)*6*y*(0.41-y)/(0.41**2),0)) # CF为系数矩阵
-uin = CF((6*y*(0.41-y)/(0.41**2),0)) # CF为系数矩阵
-# velocityD.Set(uin, definedon = mesh.Boundaries(&quot;inlet|outlet&quot;))
-velocityD.Set(uin, definedon = mesh.Boundaries(&quot;inlet&quot;))
-
-# drag_x_test = GridFunction(X)
-# drag_x_test.components[0].Set(CoefficientFunction((-20.0,0)), definedon=mesh.Boundaries(&quot;cyl&quot;))
-# drag_y_test = GridFunction(X)
-# drag_y_test.components[0].Set(CoefficientFunction((0,-20.0)), definedon=mesh.Boundaries(&quot;cyl&quot;))
-
-# # 分别绘制速度场和压力场处置
-# Draw(velocity);
-# Draw(pressure);
-
-# 设置Trial和Test函数
-(u,p),(v,q) = X.TnT()
-
-a = BilinearForm((nu*InnerProduct(grad(u),grad(v)) - div(v)*p - div(u)*q)*dx).Assemble()
-f = LinearForm(X).Assemble() # 默认为0
-
-res = f.vec - a.mat * gfuD.vec
-inv_stokes = a.mat.Inverse(X.FreeDofs())
-gfu.vec.data = gfuD.vec + inv_stokes * res
-# Draw(velocity)
-# # 绘制stokes的解（NS的初值）
-# sceneu = Draw(velocity,mesh,&quot;u&quot;)
-# scenep = Draw(pressure,mesh,&quot;p&quot;)
-
-mstar = BilinearForm((2 * InnerProduct(u, v) + dt * (nu * InnerProduct(grad(u),grad(v)) - div(v) * p - div(u) * q)) * dx).Assemble()
-inv = mstar.mat.Inverse(X.FreeDofs())
-# r1 = BilinearForm(X, nonassemble = True, symmetric=False)
-r1 = BilinearForm(X, nonassemble = True)
-r1 += dt * (- ((Grad(u) * u) * v)) * dx
-r2 = BilinearForm(dt * (InnerProduct(u, v) * dx)).Assemble()
-# r3 = BilinearForm(- dt * (nu * InnerProduct(grad(u),grad(v)) - div(v) * p - div(u) * q) * dx).Assemble()
-r3 = BilinearForm(2 * InnerProduct(u, v) * dx).Assemble()
-f = LinearForm(X).Assemble()
-
-gfu_old.vec.data = gfu.vec
-tmin = 1/1000000
-a = BilinearForm((2 * InnerProduct(u, v) + tmin * (nu * InnerProduct(grad(u),grad(v)) - div(v) * p - div(u) * q)) * dx).Assemble()
-rhs = BilinearForm((2 * InnerProduct(u, v) - tmin * (Grad(u) * u * v)) * dx).Assemble()
-inva = a.mat.Inverse(X.FreeDofs())
-res = rhs.mat * gfu.vec - a.mat * gfuD.vec
-gfu_mid.vec.data = gfuD.vec + inva * res
-gfu.vec.data = 2 * gfu_mid.vec - gfu_old.vec
-
-t = 0.0
-i = 0
-tend = 1
-gfut = GridFunction(gfu.space,multidim = 0)
-gfut.AddMultiDimComponent(gfu.vec)
-gfu1 = GridFunction(X)
-gfu2 = GridFunction(X)
-gfu3 = GridFunction(X)
-</pre></div>
-</div>
-</div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>while t &lt; tend - 0.5 * dt:
-    print (&quot;\rt=&quot;, t, end=&quot;&quot;)
-    # tau.Set(t)
-    # velocityD.Set(uin, definedon = mesh.Boundaries(&quot;inlet|outlet&quot;))
-    velocityD.Set(uin, definedon = mesh.Boundaries(&quot;inlet&quot;))
-    gfu_approximation.components[0].vec.data = 1.5 * gfu.components[0].vec - 0.5 * gfu_old.components[0].vec
-    gfu_approximation.components[1].vec.data = gfu.components[1].vec
-
-    r1.Assemble()
-
-    f.vec.data = r1.mat * gfu_approximation.vec
-    gfu1.vec.data = inv * f.vec
-
-    f.vec.data = r2.mat * gfu_approximation.vec
-    gfu2.vec.data = inv * f.vec
-
-    f.vec.data = r3.mat * gfu.vec - mstar.mat * gfuD.vec
-    gfu3.vec.data = gfuD.vec + inv * f.vec
-
-    # 当前速度
-    velocity_approximation = gfu_approximation.components[0]
-    velocity1 = gfu1.components[0]
-    velocity2 = gfu2.components[0]
-    velocity3 = gfu3.components[0]
-
-    # 构造 F(uⁿ) = (u · ∇)u
-    du = grad(velocity_approximation)
-    F_un = CoefficientFunction((
-        velocity_approximation[0]*du[0,0] + velocity_approximation[1]*du[0,1],
-        velocity_approximation[0]*du[1,0] + velocity_approximation[1]*du[1,1]
-    ))
-    F_u = GridFunction(X)
-    conv_u = F_u.components[0]
-    conv_u.Set(F_un)
-
-    # 计算每个项
-    a11 = Integrate(InnerProduct(velocity_approximation, velocity_approximation), mesh) - Integrate(InnerProduct(velocity_approximation, velocity1), mesh)
-    a12 = - Integrate(InnerProduct(velocity_approximation, velocity2), mesh)
-    a21 = - Integrate(InnerProduct(F_un, velocity1), mesh)
-    a22 = Integrate(InnerProduct(velocity_approximation, velocity_approximation), mesh) - Integrate(InnerProduct(F_un, velocity2), mesh)
-    b1  = Integrate(InnerProduct(velocity_approximation, velocity3), mesh)
-    b2  = Integrate(InnerProduct(F_un, velocity3), mesh) - Integrate(0.5 * InnerProduct(velocity_approximation, velocity_approximation) * InnerProduct(velocity_approximation, n), mesh, BND)
-
-    alpha = (b1 * a22 - a12 * b2) / (a11 * a22 - a12 * a21)
-    beta = (a11 * b2 - b1 * a21) / (a11 * a22 - a12 * a21)
-    gfu_old.vec.data = gfu.vec
-    gfu_mid.vec.data = alpha * gfu1.vec + beta * gfu2.vec + gfu3.vec
-
-    gfu.vec.data = 2 * gfu_mid.vec - gfu_old.vec
-
-    mean_p = Integrate(pressure, mesh)
-    domain_vol = Integrate(1, mesh)
-    mean_val = mean_p / domain_vol
-
-    # 2. 创建 offset 向量
-    ones = pressure.vec.CreateVector()
-    ones[:] = 1.0
-    offset = mean_val * ones
-
-    # 3. 减去 offset，实现零均值
-    pressure.vec.data -= offset
-
-    t = t + dt
-    i += 1
-
-    grad_v  = Grad(velocity)              # ∇u
-    strain  = grad_v + grad_v.trans       # (∇u + ∇uᵀ)
-    traction = -pressure * n + nu * (strain * n)   # σ·n
-
-    FD = Integrate(traction[0], mesh,
-                   definedon=mesh.Boundaries(&quot;cyl&quot;))   # 拖曳力
-    FL = Integrate(traction[1], mesh,
-                   definedon=mesh.Boundaries(&quot;cyl&quot;))   # 升力
-
-    drag_x_vals.append(FD)
-    drag_y_vals.append(FL)
-    time_vals.append(t)
-
-    if i % 100 == 0:
-        gfut.AddMultiDimComponent(gfu.vec)
-
-gfut.AddMultiDimComponent(gfu.vec)
-</pre></div>
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-t= 3.998999999999670676
-</pre></div></div>
-</div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>Draw (gfut.components[0], mesh, interpolate_multidim=True, animate=True, autoscale=False, vectors = True);
-Draw (gfut.components[1], mesh, interpolate_multidim=True, animate=True, autoscale=False);
-
-# Plot drag force over time
-plt.plot(time_vals, drag_x_vals)
-plt.xlabel(&#39;time&#39;); plt.ylabel(&#39;drag&#39;); plt.title(&#39;drag&#39;); plt.grid(True)
-plt.show()
-# Plot lift force over time
-plt.plot(time_vals, drag_y_vals)
-plt.xlabel(&#39;time&#39;); plt.ylabel(&#39;lift&#39;); plt.title(&#39;lift&#39;); plt.grid(True)
-plt.show()
-</pre></div>
-</div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "b45ca110439648a09f6c6f3ecaa96dc2", "version_major": 2, "version_minor": 0}</script></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "81912fafe2f94393b32aee554d195327", "version_major": 2, "version_minor": 0}</script></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<img alt="../_images/notebooks_Flow_around_a_cylinder_17_2.png" src="../_images/notebooks_Flow_around_a_cylinder_17_2.png" />
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<img alt="../_images/notebooks_Flow_around_a_cylinder_17_3.png" src="../_images/notebooks_Flow_around_a_cylinder_17_3.png" />
-</div>
-</div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[35]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import os
-
-outdir = r&quot;E:\seminar\ouputdir\Cylinder_CN2&quot;
-os.makedirs(outdir, exist_ok=True)  # 自动创建目录
-file_path = os.path.join(outdir, &quot;1000_8_1000&quot;)
-vtkout = VTKOutput(
-    mesh,
-    coefs = [gfu.components[0], gfu.components[1]],
-    names = [&quot;velocity&quot;, &quot;pressure&quot;],
-    filename = file_path,
-    subdivision = 2)
-
-nframes = len(gfut.vecs)  # 多帧数量
-
-for i in range(nframes):
-    # 提取第i帧的解
-    gfu.vec.data = gfut.vecs[i]  # 恢复到第i帧
-    outname = vtkout.Do(time=i)
-print(&quot;已写出：&quot;, outname)
-
-import numpy as np
-
-np.savez(&#39;cylinder_bdf2_drag_lift.npz&#39;, time=time_vals, drag=drag_x_vals, lift=drag_y_vals)
-# 加载方式
-# data = np.load(&#39;cylinder_drag_lift.npz&#39;)
-# drag = data[&#39;drag&#39;]
-# lift = data[&#39;lift&#39;]
-</pre></div>
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-已写出： E:\seminar\ouputdir\Cylinder_CN2\1000_8_1000_step00041
-</pre></div></div>
-</div>
-</section>
-<section id="4.-CN2增量形式">
-<h1>4. CN2增量形式<a class="headerlink" href="#4.-CN2增量形式" title="Link to this heading"></a></h1>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[37]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>from ngsolve import *
-from ngsolve.webgui import Draw
-from netgen.occ import *
-from netgen.webgui import Draw as DrawGeo
-import matplotlib
-import numpy as np
-import matplotlib.pyplot as plt
-
-shape = Rectangle(2.2,0.41).Circle(0.2,0.2,0.05).Reverse().Face()  # 先绘制一个矩形，再在(0.2,0.2)位置绘制圆，并Reverse使其为interface
-shape.edges.name = &quot;cyl&quot; # 圆形表面
-shape.edges.Max(X).name = &quot;outlet&quot;
-shape.edges.Min(X).name = &quot;inlet&quot;
-shape.edges.Max(Y).name = &quot;wall&quot;
-shape.edges.Min(Y).name = &quot;wall&quot;
-mesh = Mesh(OCCGeometry(shape, dim=2).GenerateMesh(maxh = 1/8)).Curve(3) # 三阶多项式拟合曲线
-# n = specialcf.normal(mesh.dim)
-n  = specialcf.normal(mesh.dim)        # 外法向
-Id = Id(mesh.dim)                       # 单位张量  (或  Id(2)  )
-rho = 1                                 # ρ=1 已隐含在 ν 里
-D   = 0.1                               # 圆柱直径（用来算系数）
-Uref = 1.5                              # 入口平均速度
-
-# # 绘制物理域及计算域
-# DrawGeo(shape);
-# Draw(mesh); # OCCGeometry会根据绘制图像复杂性生成不同粗细的网格拟合（如圆附近网格会更细）
-
-nu = 0.001
-k = 3 # 空间阶数
-dt = 1/1000 # 定义时间步长
-t = 0
-i = 0
-time_vals, drag_x_vals, drag_y_vals = [],[],[]
-
-V = VectorH1(mesh, order = k, dirichlet = &quot;wall|cyl|inlet&quot;)
-Q = H1(mesh, order = k-1) # 未指明的边界默认为自然边界条件（在弱形式中会体现为零Neumann边界条件）
-X = V * Q # 定义速度场与压力场的耦合空间
-
-gfu = GridFunction(X) # 设置GridFunction作为解域，用于存储解作为后续初值使用
-gfu_mid = GridFunction(X)
-gfu_old = GridFunction(X)
-gfu_approximation = GridFunction(X)
-velocity, pressure = gfu.components # X由V，P组成，gfu.components即为[V，P]
-uin = CF((1.5*4*y*(0.41-y)/(0.41**2),0)) # CF为系数矩阵
-velocity.Set(uin, definedon = mesh.Boundaries(&quot;inlet&quot;))
-
-# gfu_D.vec.data.FV().NumPy()[X.FreeDofs()] = 0
-
-drag_x_test = GridFunction(X)
-drag_x_test.components[0].Set(CoefficientFunction((-20.0,0)), definedon=mesh.Boundaries(&quot;cyl&quot;))
-drag_y_test = GridFunction(X)
-drag_y_test.components[0].Set(CoefficientFunction((0,-20.0)), definedon=mesh.Boundaries(&quot;cyl&quot;))
-
-# # 分别绘制速度场和压力场处置
-# Draw(velocity);
-# Draw(pressure);
-
-# 设置Trial和Test函数
-(u,p),(v,q) = X.TnT()
-
-a = BilinearForm((nu*InnerProduct(grad(u),grad(v)) - div(v)*p - div(u)*q)*dx).Assemble()
-f = LinearForm(X).Assemble() # 默认为0
-
-res = f.vec - a.mat * gfu.vec
-inv_stokes = a.mat.Inverse(X.FreeDofs())
-gfu.vec.data += inv_stokes * res
-
-# # 绘制stokes的解（NS的初值）
-# sceneu = Draw(velocity,mesh,&quot;u&quot;)
-# scenep = Draw(pressure,mesh,&quot;p&quot;)
-
-mstar = BilinearForm((2 * InnerProduct(u, v) + dt * (nu * InnerProduct(grad(u),grad(v)) - div(v) * p - div(u) * q)) * dx).Assemble()
-inv = mstar.mat.Inverse(X.FreeDofs())
-r1 = BilinearForm(X, nonassemble = True)
-r1 += dt * (- ((Grad(u) * u) * v)) * dx
-r2 = BilinearForm(dt * (InnerProduct(u, v) * dx)).Assemble()
-r3 = BilinearForm(- dt * (nu * InnerProduct(grad(u),grad(v)) - div(v) * p - div(u) * q) * dx).Assemble()
-f = LinearForm(X).Assemble()
-
-gfu_old.vec.data = gfu.vec
-tmin = 1/1000000
-a = BilinearForm((InnerProduct(u, v) + tmin * (nu * InnerProduct(grad(u),grad(v)) - div(v) * p - div(u) * q)) * dx).Assemble()
-rhs = BilinearForm((-tmin * (nu * InnerProduct(grad(u),grad(v)) - div(v) * p - div(u) * q) - tmin * (Grad(u) * u * v)) * dx).Assemble()
-inva = a.mat.Inverse(X.FreeDofs())
-res = rhs.mat * gfu.vec
-gfu.vec.data += inva * res
-
-t = 0
-i = 0
-tend = 5
-gfut = GridFunction(gfu.space,multidim = 0)
-gfut.AddMultiDimComponent(gfu.vec)
-gfu1 = GridFunction(X)
-gfu2 = GridFunction(X)
-gfu3 = GridFunction(X)
-
-while t &lt; tend - 0.5 * dt:
-    print (&quot;\rt=&quot;, t, end=&quot;&quot;)
-    r1.Assemble()
-    gfu_approximation.vec.data = 1.5 * gfu.vec - 0.5 * gfu_old.vec
-    f.vec.data = r1.mat * gfu_approximation.vec
-    gfu1.vec.data = inv * f.vec
-
-    f.vec.data = r2.mat * gfu_approximation.vec
-    gfu2.vec.data = inv * f.vec
-
-    f.vec.data = r3.mat * gfu.vec
-    # f.vec.data = r3.mat * gfu.vec - dt * a.mat * gfu_D.vec
-    gfu3.vec.data = gfu.vec + inv * f.vec
-
-    # 当前速度
-    velocity_approximation = gfu_approximation.components[0]
-    velocity1 = gfu1.components[0]
-    velocity2 = gfu2.components[0]
-    velocity3 = gfu3.components[0]
-
-    # 构造 F(uⁿ) = (u · ∇)u
-    du = grad(velocity_approximation)
-    F_un = CoefficientFunction((
-        velocity_approximation[0]*du[0,0] + velocity_approximation[1]*du[0,1],
-        velocity_approximation[0]*du[1,0] + velocity_approximation[1]*du[1,1]
-    ))
-    F_u = GridFunction(X)
-    conv_u = F_u.components[0]
-    conv_u.Set(F_un)
-
-    # 计算每个项
-    a11 = Integrate(InnerProduct(velocity_approximation, velocity_approximation), mesh) - Integrate(InnerProduct(velocity_approximation, velocity1), mesh)
-    a12 = - Integrate(InnerProduct(velocity_approximation, velocity2), mesh)
-    a21 = - Integrate(InnerProduct(F_un, velocity1), mesh)
-    a22 = Integrate(InnerProduct(velocity_approximation, velocity), mesh) - Integrate(InnerProduct(F_un, velocity2), mesh)
-    b1  = Integrate(InnerProduct(velocity_approximation, velocity3), mesh)
-    b2  = Integrate(InnerProduct(F_un, velocity3), mesh) - Integrate(0.5 * InnerProduct(velocity_approximation, velocity_approximation) * InnerProduct(velocity_approximation, n), mesh, BND)
-    # b2  = InnerProduct(conv_u.vec, velocity3.vec)
-    # print(a11,a12,a21,a22)
-    # print(b1,b2)
-
-    alpha = (b1 * a22 - a12 * b2) / (a11 * a22 - a12 * a21)
-    beta = (a11 * b2 - b1 * a21) / (a11 * a22 - a12 * a21)
-    # print(alpha, beta)
-    # print()
-    # break
-    gfu_old.vec.data = gfu.vec
-    gfu_mid.vec.data = alpha * gfu1.vec + beta * gfu2.vec + gfu3.vec
-
-    gfu.vec.data = 2 * gfu_mid.vec - gfu_old.vec
-
-    mean_p = Integrate(pressure, mesh)
-    domain_vol = Integrate(1, mesh)
-    mean_val = mean_p / domain_vol
-
-    # 2. 创建 offset 向量
-    ones = pressure.vec.CreateVector()
-    ones[:] = 1.0
-    offset = mean_val * ones
-
-    # 3. 减去 offset，实现零均值
-    pressure.vec.data -= offset
-
-    t = t + dt
-    i += 1
-
-    grad_v  = Grad(velocity)              # ∇u
-    strain  = grad_v + grad_v.trans       # (∇u + ∇uᵀ)
-    traction = -pressure * n + nu * (strain * n)   # σ·n
-
-    FD = Integrate(traction[0], mesh,
-                   definedon=mesh.Boundaries(&quot;cyl&quot;))   # 拖曳力
-    FL = Integrate(traction[1], mesh,
-                   definedon=mesh.Boundaries(&quot;cyl&quot;))   # 升力
-
-    drag_x_vals.append(FD)
-    drag_y_vals.append(FL)
-    time_vals.append(t)
-
-    if i % 100 == 0:
-        gfut.AddMultiDimComponent(gfu.vec)
-
-Draw (gfut.components[0], mesh, interpolate_multidim=True, animate=True, autoscale=False, vectors = True);
-Draw (gfut.components[1], mesh, interpolate_multidim=True, animate=True, autoscale=False);
-
-# Plot drag force over time
-plt.plot(time_vals, drag_x_vals)
-plt.xlabel(&#39;time&#39;); plt.ylabel(&#39;drag&#39;); plt.title(&#39;drag&#39;); plt.grid(True)
-plt.show()
-# Plot lift force over time
-plt.plot(time_vals, drag_y_vals)
-plt.xlabel(&#39;time&#39;); plt.ylabel(&#39;lift&#39;); plt.title(&#39;lift&#39;); plt.grid(True)
-plt.show()
-</pre></div>
-</div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-t= 4.999000000000004676
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "a9f7ff37fdb24896b11af04f8b85012f", "version_major": 2, "version_minor": 0}</script></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "6d89f6b8ec774e5aad1d4b25c6ff03df", "version_major": 2, "version_minor": 0}</script></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<img alt="../_images/notebooks_Flow_around_a_cylinder_20_3.png" src="../_images/notebooks_Flow_around_a_cylinder_20_3.png" />
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<img alt="../_images/notebooks_Flow_around_a_cylinder_20_4.png" src="../_images/notebooks_Flow_around_a_cylinder_20_4.png" />
-</div>
-</div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import os
-
-outdir = r&quot;D:\BaiduNetdiskDownload\seminar\ouputdir\Cylinder_Incremention_BDF2&quot;
-os.makedirs(outdir, exist_ok=True)  # 自动创建目录
-file_path = os.path.join(outdir, &quot;100_80_1000&quot;)
-vtkout = VTKOutput(
-    mesh,
-    coefs = [gfu.components[0], gfu.components[1]],
-    names = [&quot;velocity&quot;, &quot;pressure&quot;],
-    filename = file_path,
-    subdivision = 2)
-
-nframes = len(gfut.vecs)  # 多帧数量
-
-for i in range(nframes):
-    # 提取第i帧的解
-    gfu.vec.data = gfut.vecs[i]  # 恢复到第i帧
-    outname = vtkout.Do(time=i)
-print(&quot;已写出：&quot;, outname)
-
-import numpy as np
-
-np.savez(&#39;cylinder_drag_lift.npz&#39;, time=time_vals, drag=drag_x_vals, lift=drag_y_vals)
-# 加载方式
-# data = np.load(&#39;cylinder_drag_lift.npz&#39;)
-# drag = data[&#39;drag&#39;]
-# lift = data[&#39;lift&#39;]
-</pre></div>
-</div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "d7a50158ca054e58b13cae3ced01f04d", "version_major": 2, "version_minor": 0}</script></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "b81d352dacc44c918936a42f70f41965", "version_major": 2, "version_minor": 0}</script></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<img alt="../_images/notebooks_Flow_around_a_cylinder_21_2.png" src="../_images/notebooks_Flow_around_a_cylinder_21_2.png" />
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<img alt="../_images/notebooks_Flow_around_a_cylinder_21_3.png" src="../_images/notebooks_Flow_around_a_cylinder_21_3.png" />
-</div>
-</div>
-</section>
-<section id="4.-BDF2">
-<h1>4. BDF2<a class="headerlink" href="#4.-BDF2" title="Link to this heading"></a></h1>
-<section id="4.1-BDF2一般形式">
-<h2>4.1 BDF2一般形式<a class="headerlink" href="#4.1-BDF2一般形式" title="Link to this heading"></a></h2>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[33]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>from ngsolve import *
-from ngsolve.webgui import Draw
-from netgen.occ import *
-from netgen.webgui import Draw as DrawGeo
-import matplotlib
-import numpy as np
-import matplotlib.pyplot as plt
-
-shape = Rectangle(2.2,0.41).Circle(0.2,0.2,0.05).Reverse().Face()  # 先绘制一个矩形，再在(0.2,0.2)位置绘制圆，并Reverse使其为interface
-shape.edges.name = &quot;cyl&quot; # 圆形表面
-shape.edges.Max(X).name = &quot;outlet&quot;
-shape.edges.Min(X).name = &quot;inlet&quot;
-shape.edges.Max(Y).name = &quot;wall&quot;
-shape.edges.Min(Y).name = &quot;wall&quot;
-mesh = Mesh(OCCGeometry(shape, dim=2).GenerateMesh(maxh = 1/8)).Curve(3) # 三阶多项式拟合曲线
-# n = specialcf.normal(mesh.dim)
-n  = specialcf.normal(mesh.dim)        # 外法向
-Id = Id(mesh.dim)                       # 单位张量  (或  Id(2)  )
-rho = 1                                 # ρ=1 已隐含在 ν 里
-D   = 0.1                               # 圆柱直径（用来算系数）
-Uref = 1.5                              # 入口平均速度
-
-# # 绘制物理域及计算域
-# DrawGeo(shape);
-# Draw(mesh); # OCCGeometry会根据绘制图像复杂性生成不同粗细的网格拟合（如圆附近网格会更细）
-
-nu = 0.001
-k = 3 # 空间阶数
-dt = 0.001 # 定义时间步长
-t = 0
-i = 0
-time_vals, drag_x_vals, drag_y_vals = [],[],[]
-
-V = VectorH1(mesh, order = k, dirichlet = &quot;wall|cyl|inlet&quot;)
-Q = H1(mesh, order = k-1) # 未指明的边界默认为自然边界条件（在弱形式中会体现为零Neumann边界条件）
-X = V * Q # 定义速度场与压力场的耦合空间
-
-gfu = GridFunction(X) # 设置GridFunction作为解域，用于存储解作为后续初值使用
-gfu_D = GridFunction(X)
-gfu_mid = GridFunction(X)
-gfu_old = GridFunction(X)
-gfu_approximation = GridFunction(X)
-velocity, pressure = gfu.components # X由V，P组成，gfu.components即为[V，P]
-velocity_D, pressure_D = gfu_D.components
-uin = CF((1.5*4*y*(0.41-y)/(0.41**2),0)) # CF为系数矩阵
-velocity_D.Set(uin, definedon = mesh.Boundaries(&quot;inlet&quot;))
-
-# # 分别绘制速度场和压力场处置
-# Draw(velocity);
-# Draw(pressure);
-
-# 设置Trial和Test函数
-(u,p),(v,q) = X.TnT()
-
-a = BilinearForm((nu*InnerProduct(grad(u),grad(v)) - div(v)*p - div(u)*q)*dx).Assemble()
-f = LinearForm(X).Assemble() # 默认为0
-
-res = f.vec - a.mat * gfu_D.vec
-inv_stokes = a.mat.Inverse(X.FreeDofs())
-gfu.vec.data = gfu_D.vec + inv_stokes * res
-
-# # 绘制stokes的解（NS的初值）
-# sceneu = Draw(velocity,mesh,&quot;u&quot;)
-# scenep = Draw(pressure,mesh,&quot;p&quot;)
-
-mstar = BilinearForm((1.5*InnerProduct(u, v) + dt * (nu * InnerProduct(grad(u),grad(v)) - div(v) * p - div(u) * q)) * dx).Assemble()
-inv = mstar.mat.Inverse(X.FreeDofs())
-r1 = BilinearForm(X, nonassemble = True)
-r1 += dt * (- ((Grad(u) * u) * v)) * dx
-r2 = BilinearForm(dt * (InnerProduct(u, v) * dx)).Assemble()
-r3 = BilinearForm(InnerProduct(u, v) * dx).Assemble()
-f = LinearForm(X).Assemble()
-
-gfu_old.vec.data = gfu.vec
-tmin = 1/1000000
-a = BilinearForm((InnerProduct(u, v) + tmin * (nu * InnerProduct(grad(u),grad(v)) - div(v) * p - div(u) * q)) * dx).Assemble()
-rhs = BilinearForm((InnerProduct(u, v) - tmin * (Grad(u) * u * v)) * dx).Assemble()
-inva = a.mat.Inverse(X.FreeDofs())
-res = rhs.mat * gfu.vec - a.mat * gfu_D.vec
-gfu.vec.data = gfu_D.vec + inva * res
-
-t = 0
-i = 0
-tend = 5
-gfut = GridFunction(gfu.space,multidim = 0)
-gfut.AddMultiDimComponent(gfu.vec)
-gfu1 = GridFunction(X)
-gfu2 = GridFunction(X)
-gfu3 = GridFunction(X)
-gfu_n = GridFunction(X)
-
-while t &lt; tend - 0.5 * dt:
-    print (&quot;\rt=&quot;, t, end=&quot;&quot;)
-    r1.Assemble()
-    gfu_approximation.vec.data = 2 * gfu.vec - gfu_old.vec
-    f.vec.data = r1.mat * gfu_approximation.vec
-    gfu1.vec.data = inv * f.vec
-
-    f.vec.data = r2.mat * gfu_approximation.vec
-    gfu2.vec.data = inv * f.vec
-
-    gfu_n.vec.data = 2 * gfu.vec - 0.5 * gfu_old.vec
-    f.vec.data = r3.mat * gfu_n.vec - mstar.mat * gfu_D.vec
-    # f.vec.data = r3.mat * gfu.vec - dt * a.mat * gfu_D.vec
-    gfu3.vec.data = gfu_D.vec + inv * f.vec
-
-    # 当前速度
-    velocity_approximation = gfu_approximation.components[0]
-    velocity1 = gfu1.components[0]
-    velocity2 = gfu2.components[0]
-    velocity3 = gfu3.components[0]
-
-    # 构造 F(uⁿ) = (u · ∇)u
-    du = grad(velocity_approximation)
-    F_un = CoefficientFunction((
-        velocity_approximation[0]*du[0,0] + velocity_approximation[1]*du[0,1],
-        velocity_approximation[0]*du[1,0] + velocity_approximation[1]*du[1,1]
-    ))
-    F_u = GridFunction(X)
-    conv_u = F_u.components[0]
-    conv_u.Set(F_un)
-
-    # 计算每个项
-    a11 = Integrate(InnerProduct(velocity_approximation, velocity_approximation), mesh) - Integrate(InnerProduct(velocity_approximation, velocity1), mesh)
-    a12 = - Integrate(InnerProduct(velocity_approximation, velocity2), mesh)
-    a21 = - Integrate(InnerProduct(F_un, velocity1), mesh)
-    a22 = Integrate(InnerProduct(velocity_approximation, velocity), mesh) - Integrate(InnerProduct(F_un, velocity2), mesh)
-    b1  = Integrate(InnerProduct(velocity_approximation, velocity3), mesh)
-    b2  = Integrate(InnerProduct(F_un, velocity3), mesh) - Integrate(0.5 * InnerProduct(velocity_approximation, velocity_approximation) * InnerProduct(velocity_approximation, n), mesh, BND)
-    # b2  = InnerProduct(conv_u.vec, velocity3.vec)
-    # print(a11,a12,a21,a22)
-    # print(b1,b2)
-
-    alpha = (b1 * a22 - a12 * b2) / (a11 * a22 - a12 * a21)
-    beta = (a11 * b2 - b1 * a21) / (a11 * a22 - a12 * a21)
-    # print()
-    # print(alpha, beta)
-    # break
-    gfu_old.vec.data = gfu.vec
-    gfu.vec.data = alpha * gfu1.vec + beta * gfu2.vec + gfu3.vec
-
-    mean_p = Integrate(pressure, mesh)
-    domain_vol = Integrate(1, mesh)
-    mean_val = mean_p / domain_vol
-
-    # 2. 创建 offset 向量
-    ones = pressure.vec.CreateVector()
-    ones[:] = 1.0
-    offset = mean_val * ones
-
-    # 3. 减去 offset，实现零均值
-    pressure.vec.data -= offset
-
-    t = t + dt
-    i += 1
-
-    grad_v  = Grad(velocity)              # ∇u
-    strain  = grad_v + grad_v.trans       # (∇u + ∇uᵀ)
-    traction = -pressure * n + nu * (strain * n)   # σ·n
-
-    FD = Integrate(traction[0], mesh,
-                   definedon=mesh.Boundaries(&quot;cyl&quot;))   # 拖曳力
-    FL = Integrate(traction[1], mesh,
-                   definedon=mesh.Boundaries(&quot;cyl&quot;))   # 升力
-
-    drag_x_vals.append(FD)
-    drag_y_vals.append(FL)
-    time_vals.append(t)
-
-    if i % 100 == 0:
-        gfut.AddMultiDimComponent(gfu.vec)
-
-Draw (gfut.components[0], mesh, interpolate_multidim=True, animate=True, autoscale=False, vectors = True);
-Draw (gfut.components[1], mesh, interpolate_multidim=True, animate=True, autoscale=False);
-
-# Plot drag force over time
-plt.plot(time_vals, drag_x_vals)
-plt.xlabel(&#39;time&#39;); plt.ylabel(&#39;drag&#39;); plt.title(&#39;drag&#39;); plt.grid(True)
-plt.show()
-# Plot lift force over time
-plt.plot(time_vals, drag_y_vals)
-plt.xlabel(&#39;time&#39;); plt.ylabel(&#39;lift&#39;); plt.title(&#39;lift&#39;); plt.grid(True)
-plt.show()
-</pre></div>
-</div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-t= 4.999000000000004676
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "d671ff892ae94f07a99d338381dc59b6", "version_major": 2, "version_minor": 0}</script></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "909b06a3a03443c39102c2682aa7283b", "version_major": 2, "version_minor": 0}</script></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<img alt="../_images/notebooks_Flow_around_a_cylinder_24_3.png" src="../_images/notebooks_Flow_around_a_cylinder_24_3.png" />
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<img alt="../_images/notebooks_Flow_around_a_cylinder_24_4.png" src="../_images/notebooks_Flow_around_a_cylinder_24_4.png" />
-</div>
-</div>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import os
-
-outdir = r&quot;E:\seminar\ouputdir\Cylinder_BDF2&quot;
-os.makedirs(outdir, exist_ok=True)  # 自动创建目录
-file_path = os.path.join(outdir, &quot;1000_8_1000&quot;)
-vtkout = VTKOutput(
-    mesh,
-    coefs = [gfu.components[0], gfu.components[1]],
-    names = [&quot;velocity&quot;, &quot;pressure&quot;],
-    filename = file_path,
-    subdivision = 2)
-
-nframes = len(gfut.vecs)  # 多帧数量
-
-for i in range(nframes):
-    # 提取第i帧的解
-    gfu.vec.data = gfut.vecs[i]  # 恢复到第i帧
-    outname = vtkout.Do(time=i)
-print(&quot;已写出：&quot;, outname)
-
-import numpy as np
-
-np.savez(&#39;cylinder_bdf2_drag_lift.npz&#39;, time=time_vals, drag=drag_x_vals, lift=drag_y_vals)
-# 加载方式
-# data = np.load(&#39;cylinder_drag_lift.npz&#39;)
-# drag = data[&#39;drag&#39;]
-# lift = data[&#39;lift&#39;]
-</pre></div>
-</div>
-</div>
-</section>
-<section id="4.2-BDF2增量形式">
-<h2>4.2 BDF2增量形式<a class="headerlink" href="#4.2-BDF2增量形式" title="Link to this heading"></a></h2>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>from ngsolve import *
-from ngsolve.webgui import Draw
-from netgen.occ import *
-from netgen.webgui import Draw as DrawGeo
-import matplotlib
-import numpy as np
-import matplotlib.pyplot as plt
-
-shape = Rectangle(2.2,0.41).Circle(0.2,0.2,0.05).Reverse().Face()  # 先绘制一个矩形，再在(0.2,0.2)位置绘制圆，并Reverse使其为interface
-shape.edges.name = &quot;cyl&quot; # 圆形表面
-shape.edges.Max(X).name = &quot;outlet&quot;
-shape.edges.Min(X).name = &quot;inlet&quot;
-shape.edges.Max(Y).name = &quot;wall&quot;
-shape.edges.Min(Y).name = &quot;wall&quot;
-mesh = Mesh(OCCGeometry(shape, dim=2).GenerateMesh(maxh = 1/8)).Curve(3) # 三阶多项式拟合曲线
-
-n  = specialcf.normal(mesh.dim)        # 外法向
-Id = Id(mesh.dim)                       # 单位张量  (或  Id(2)  )
-rho = 1                                 # ρ=1 已隐含在 ν 里
-D   = 0.1                               # 圆柱直径（用来算系数）
-Uref = 1.5                              # 入口平均速度
-
-# # 绘制物理域及计算域
-# DrawGeo(shape);
-# Draw(mesh); # OCCGeometry会根据绘制图像复杂性生成不同粗细的网格拟合（如圆附近网格会更细）
-
-nu = 0.001
-k = 3 # 空间阶数
-dt = 0.001 # 定义时间步长
-t = 0
-i = 0
-time_vals, drag_x_vals, drag_y_vals = [],[],[]
-
-V = VectorH1(mesh, order = k, dirichlet = &quot;wall|cyl|inlet&quot;)
-Q = H1(mesh, order = k-1) # 未指明的边界默认为自然边界条件（在弱形式中会体现为零Neumann边界条件）
-X = V * Q # 定义速度场与压力场的耦合空间
-
-gfu = GridFunction(X) # 设置GridFunction作为解域，用于存储解作为后续初值使用
-gfu_mid = GridFunction(X)
-gfu_old = GridFunction(X)
-gfu_approximation = GridFunction(X)
-velocity, pressure = gfu.components # X由V，P组成，gfu.components即为[V，P]
-uin = CF((1.5*4*y*(0.41-y)/(0.41**2),0)) # CF为系数矩阵
-velocity.Set(uin, definedon = mesh.Boundaries(&quot;inlet&quot;))
-
-# gfu_D.vec.data.FV().NumPy()[X.FreeDofs()] = 0
-
-drag_x_test = GridFunction(X)
-drag_x_test.components[0].Set(CoefficientFunction((-20.0,0)), definedon=mesh.Boundaries(&quot;cyl&quot;))
-drag_y_test = GridFunction(X)
-drag_y_test.components[0].Set(CoefficientFunction((0,-20.0)), definedon=mesh.Boundaries(&quot;cyl&quot;))
-
-# # 分别绘制速度场和压力场处置
-# Draw(velocity);
-# Draw(pressure);
-
-# 设置Trial和Test函数
-(u,p),(v,q) = X.TnT()
-
-a = BilinearForm((nu*InnerProduct(grad(u),grad(v)) - div(v)*p - div(u)*q)*dx).Assemble()
-f = LinearForm(X).Assemble() # 默认为0
-
-res = f.vec - a.mat * gfu.vec
-inv_stokes = a.mat.Inverse(X.FreeDofs())
-gfu.vec.data += inv_stokes * res
-
-# # 绘制stokes的解（NS的初值）
-# sceneu = Draw(velocity,mesh,&quot;u&quot;)
-# scenep = Draw(pressure,mesh,&quot;p&quot;)
-
-mstar = BilinearForm((1.5*InnerProduct(u, v) + dt * (nu * InnerProduct(grad(u),grad(v)) - div(v) * p - div(u) * q)) * dx).Assemble()
-inv = mstar.mat.Inverse(X.FreeDofs())
-r1 = BilinearForm(X, nonassemble = True)
-r1 += dt * (- ((Grad(u) * u) * v)) * dx
-r2 = BilinearForm(dt * (InnerProduct(u, v) * dx)).Assemble()
-r3 = BilinearForm(- dt * (nu * InnerProduct(grad(u),grad(v)) - div(v) * p - div(u) * q) * dx).Assemble()
-conv = BilinearForm(X, nonassemble = True)
-conv += ((Grad(u) * u) * v) * dx
-m = BilinearForm((InnerProduct(u, v) * dx)).Assemble()
-f = LinearForm(X).Assemble()
-
-gfu_old.vec.data = gfu.vec
-tmin = 1/1000000
-a0 = BilinearForm((InnerProduct(u, v) + tmin * (nu * InnerProduct(grad(u),grad(v)) - div(v) * p - div(u) * q)) * dx).Assemble()
-rhs = BilinearForm((-tmin * (nu * InnerProduct(grad(u),grad(v)) - div(v) * p - div(u) * q) - tmin * (Grad(u) * u * v)) * dx).Assemble()
-inva = a0.mat.Inverse(X.FreeDofs())
-res = rhs.mat * gfu.vec
-gfu.vec.data += inva * res
-
-t = 0
-i = 0
-tend = 25
-gfut = GridFunction(gfu.space,multidim = 0)
-gfut.AddMultiDimComponent(gfu.vec)
-gfu1 = GridFunction(X)
-gfu2 = GridFunction(X)
-gfu3 = GridFunction(X)
-gfu_n = GridFunction(X)
-
-while t &lt; tend - 0.5 * dt:
-    print (&quot;\rt=&quot;, t, end=&quot;&quot;)
-    conv.Assemble()
-    r1.Assemble()
-    gfu_approximation.vec.data = 2 * gfu.vec - gfu_old.vec
-    f.vec.data = r1.mat * gfu_approximation.vec
-    gfu1.vec.data = inv * f.vec
-
-    f.vec.data = r2.mat * gfu_approximation.vec
-    gfu2.vec.data = inv * f.vec
-
-    gfu_n.vec.data = 0.5 * gfu.vec - 0.5 * gfu_old.vec
-    f.vec.data = r3.mat * gfu.vec + m.mat * gfu_n.vec
-    # f.vec.data = r3.mat * gfu.vec - dt * a.mat * gfu_D.vec
-    gfu3.vec.data = gfu.vec + inv * f.vec
-
-    # 当前速度
-    velocity_approximation = gfu_approximation.components[0]
-    velocity1 = gfu1.components[0]
-    velocity2 = gfu2.components[0]
-    velocity3 = gfu3.components[0]
-
-    # 构造 F(uⁿ) = (u · ∇)u
-    du = grad(velocity_approximation)
-    F_un = CoefficientFunction((
-        velocity_approximation[0]*du[0,0] + velocity_approximation[1]*du[0,1],
-        velocity_approximation[0]*du[1,0] + velocity_approximation[1]*du[1,1]
-    ))
-    F_u = GridFunction(X)
-    conv_u = F_u.components[0]
-    conv_u.Set(F_un)
-
-    # 计算每个项
-    a11 = Integrate(InnerProduct(velocity_approximation, velocity_approximation), mesh) - Integrate(InnerProduct(velocity_approximation, velocity1), mesh)
-    a12 = - Integrate(InnerProduct(velocity_approximation, velocity2), mesh)
-    a21 = - Integrate(InnerProduct(F_un, velocity1), mesh)
-    a22 = Integrate(InnerProduct(velocity_approximation, velocity), mesh) - Integrate(InnerProduct(F_un, velocity2), mesh)
-    b1  = Integrate(InnerProduct(velocity_approximation, velocity3), mesh)
-    b2  = Integrate(InnerProduct(F_un, velocity3), mesh) - Integrate(0.5 * InnerProduct(velocity_approximation, velocity_approximation) * InnerProduct(velocity_approximation, n), mesh, BND)
-    # b2  = InnerProduct(conv_u.vec, velocity3.vec)
-    # print(a11,a12,a21,a22)
-    # print(b1,b2)
-
-    alpha = (b1 * a22 - a12 * b2) / (a11 * a22 - a12 * a21)
-    beta = (a11 * b2 - b1 * a21) / (a11 * a22 - a12 * a21)
-    # print()
-    # print(alpha, beta)
-    # break
-    gfu_old.vec.data = gfu.vec
-    gfu.vec.data = alpha * gfu1.vec + beta * gfu2.vec + gfu3.vec
-
-    # mean_p = Integrate(pressure, mesh)
-    # domain_vol = Integrate(1, mesh)
-    # mean_val = mean_p / domain_vol
-
-    # # 2. 创建 offset 向量
-    # ones = pressure.vec.CreateVector()
-    # ones[:] = 1.0
-    # offset = mean_val * ones
-
-    # # 3. 减去 offset，实现零均值
-    # pressure.vec.data -= offset
-
-    t = t + dt
-    i += 1
-
-    res = (a.mat + conv.mat) * gfu.vec
-    drag_x_vals.append(InnerProduct(res, drag_x_test.vec) )
-    drag_y_vals.append(InnerProduct(res, drag_y_test.vec) )
-    time_vals.append(t)
-
-    if i % 100 == 0:
-        gfut.AddMultiDimComponent(gfu.vec)
-
-# Draw (gfut.components[0], mesh, interpolate_multidim=True, animate=True, autoscale=False, vectors = True);
-# Draw (gfut.components[1], mesh, interpolate_multidim=True, animate=True, autoscale=False);
-
-# Plot drag force over time
-plt.plot(time_vals, drag_x_vals)
-plt.xlabel(&#39;time&#39;); plt.ylabel(&#39;drag&#39;); plt.title(&#39;drag&#39;); plt.grid(True)
-plt.show()
-# Plot lift force over time
-plt.plot(time_vals, drag_y_vals)
-plt.xlabel(&#39;time&#39;); plt.ylabel(&#39;lift&#39;); plt.title(&#39;lift&#39;); plt.grid(True)
-plt.show()
-</pre></div>
-</div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-t= 24.99900000000757776
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<img alt="../_images/notebooks_Flow_around_a_cylinder_27_1.png" src="../_images/notebooks_Flow_around_a_cylinder_27_1.png" />
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<img alt="../_images/notebooks_Flow_around_a_cylinder_27_2.png" src="../_images/notebooks_Flow_around_a_cylinder_27_2.png" />
-</div>
-</div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import os
-
-outdir = r&quot;E:\seminar\ouputdir\Cylinder_Incremention_BDF2&quot;
-os.makedirs(outdir, exist_ok=True)  # 自动创建目录
-file_path = os.path.join(outdir, &quot;1000_8_1000&quot;)
-vtkout = VTKOutput(
-    mesh,
-    coefs = [gfu.components[0], gfu.components[1]],
-    names = [&quot;velocity&quot;, &quot;pressure&quot;],
-    filename = file_path,
-    subdivision = 2)
-
-nframes = len(gfut.vecs)  # 多帧数量
-
-for i in range(nframes):
-    # 提取第i帧的解
-    gfu.vec.data = gfut.vecs[i]  # 恢复到第i帧
-    outname = vtkout.Do(time=i)
-print(&quot;已写出：&quot;, outname)
-
-import numpy as np
-
-np.savez(&#39;cylinder_bdf2_drag_lift.npz&#39;, time=time_vals, drag=drag_x_vals, lift=drag_y_vals)
-# 加载方式
-# data = np.load(&#39;cylinder_drag_lift.npz&#39;)
-# drag = data[&#39;drag&#39;]
-# lift = data[&#39;lift&#39;]
-</pre></div>
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-已写出： E:\seminar\ouputdir\Cylinder_Incremention_BDF2\1000_8_1000_step00250
-</pre></div></div>
-</div>
-</section>
-</section>
-<section id="5.-投影法">
-<h1>5. 投影法<a class="headerlink" href="#5.-投影法" title="Link to this heading"></a></h1>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>from ngsolve import *
-from ngsolve.webgui import Draw
-from netgen.occ import *
-from netgen.webgui import Draw as DrawGeo
-import matplotlib
-import numpy as np
-import matplotlib.pyplot as plt
-
-shape = Rectangle(2.2,0.41).Circle(0.2,0.2,0.05).Reverse().Face()  # 先绘制一个矩形，再在(0.2,0.2)位置绘制圆，并Reverse使其为interface
-shape.edges.name = &quot;cyl&quot; # 圆形表面
-shape.edges.Max(X).name = &quot;outlet&quot;
-shape.edges.Min(X).name = &quot;inlet&quot;
-shape.edges.Max(Y).name = &quot;wall&quot;
-shape.edges.Min(Y).name = &quot;wall&quot;
-mesh = Mesh(OCCGeometry(shape, dim=2).GenerateMesh(maxh = 1/8)).Curve(3) # 三阶多项式拟合曲线
-
-n  = specialcf.normal(mesh.dim)
-Id = Id(mesh.dim)
-rho = 1
-D   = 0.1
-Uref = 1.5
-
-nu = 0.001
-k = 3 # 空间阶数
-dt = 0.001 # 定义时间步长
-t = 0
-i = 0
-time_vals, drag_x_vals, drag_y_vals = [],[],[]
-
-V = VectorH1(mesh, order = k, dirichlet = &quot;wall|cyl|inlet&quot;)
-Q = H1(mesh, order = k-1)
-
-u,v = V.TnT()
-p,q = Q.TnT()
-
-gfu = GridFunction(V)
-gfu_D = GridFunction(V)
-gfu_old = GridFunction(V)
-gfu_approximation = GridFunction(V)
-gfu_pre = GridFunction(V)
-gfu_temp = GridFunction(V)
-correction = GridFunction(V)
-gfu_p = GridFunction(Q)
-gfu_ptemp = GridFunction(Q)
-
-uin = CF((1.5*4*y*(0.41-y)/(0.41**2),0)) # CF为系数矩阵
-gfu_D.Set(uin, definedon = mesh.Boundaries(&quot;inlet&quot;))
-
-gfu_old.vec.data = gfu_D.vec + gfu.vec
-
-tmin = 1/1000000
-a1 = BilinearForm((InnerProduct(u, v) + tmin * nu * InnerProduct(grad(u),grad(v))) * dx).Assemble()
-inv1 = a1.mat.Inverse(V.FreeDofs())
-r1 = BilinearForm((InnerProduct(u, v) - tmin * (Grad(u) * u) * v ) * dx).Assemble()
-f1 = LinearForm(tmin * InnerProduct(gfu_p,div(v)) * dx).Assemble()
-
-a2 = BilinearForm(InnerProduct(grad(p), grad(q)) * dx).Assemble()
-inv2 = a2.mat.Inverse(Q.FreeDofs())
-f2 = LinearForm(- 1/tmin * InnerProduct(div(gfu),q) * dx).Assemble()
-rhs =  r1.mat * gfu.vec + f1.vec - a1.mat * gfu_D.vec
-gfu.vec.data = gfu_D.vec + inv1 * rhs
-
-gfu_ptemp.vec.data = inv2 * f2.vec
-gfu_p.vec.data += gfu_ptemp.vec
-
-correction.Set(grad(gfu_ptemp))
-gfu_pre.vec.data = gfu.vec
-
-gfu.vec.data = gfu_pre.vec - dt * correction.vec
-mean_p = Integrate(gfu_p, mesh)
-domain_vol = Integrate(1, mesh)
-mean_val = mean_p / domain_vol
-
-# 2. 创建 offset 向量
-ones = gfu_p.vec.CreateVector()
-ones[:] = 1.0
-offset = mean_val * ones
-
-# 3. 减去 offset，实现零均值
-gfu_p.vec.data -= offset
-
-a1 = BilinearForm((1.5*InnerProduct(u, v) + dt * nu * InnerProduct(grad(u),grad(v))) * dx).Assemble()
-inv1 = a1.mat.Inverse(V.FreeDofs())
-conv = BilinearForm(V,nonassemble = True)
-conv += (- dt * (Grad(u) * u) * v) * dx
-f1 = LinearForm(V,nonassemble = True)
-# f1 += (2 * InnerProduct(gfu, v) - 0.5 * InnerProduct(gfu_old, v) + dt * (2 * InnerProduct(gfu_p,div(v)) -  InnerProduct(gfu_p_old,div(v)))) * dx
-f1 += (2 * InnerProduct(gfu, v) - 0.5 * InnerProduct(gfu_old, v) + dt * InnerProduct(gfu_p,div(v))) * dx
-a2 = BilinearForm(InnerProduct(grad(p), grad(q)) * dx).Assemble()
-inv2 = a2.mat.Inverse(Q.FreeDofs())
-f2 = LinearForm(Q,nonassemble = True)
-f2 +=  (- 1.5/dt * (InnerProduct(div(gfu_pre),q))) * dx
-
-t = 0
-i = 0
-tend = 5
-gfut = GridFunction(gfu.space,multidim = 0)
-gfut.AddMultiDimComponent(gfu.vec)
-
-while t &lt; tend - 0.5*dt:
-    conv.Assemble()
-    f1.Assemble()
-    gfu_temp.vec.data = 2 * gfu.vec - gfu_old.vec
-    rhs =  conv.mat * gfu_temp.vec + f1.vec - a1.mat * gfu_D.vec
-    gfu_pre.vec.data = gfu_D.vec + inv1 * rhs
-
-    # Draw(gfu)
-
-    f2.Assemble()
-    gfu_ptemp.vec.data = inv2 * f2.vec
-    gfu_p_old.vec.data = gfu_p.vec
-    gfu_p.vec.data += gfu_ptemp.vec
-
-    correction = GridFunction(V)
-    correction.Set(grad(gfu_ptemp))
-    gfu_old.vec.data = gfu.vec
-    gfu.vec.data = gfu_pre.vec - 2/3*dt * correction.vec
-    mean_p = Integrate(gfu_p, mesh)
-    domain_vol = Integrate(1, mesh)
-    mean_val = mean_p / domain_vol
-
-    # 2. 创建 offset 向量
-    ones = gfu_p.vec.CreateVector()
-    ones[:] = 1.0
-    offset = mean_val * ones
-
-    # 3. 减去 offset，实现零均值
-    gfu_p.vec.data -= offset
-    # print(gfu.vec.data)
-    # break
-    t += dt
-</pre></div>
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-<span class="ansi-red-intense-fg ansi-bold">---------------------------------------------------------------------------</span>
-<span class="ansi-red-intense-fg ansi-bold">NameError</span>                                 Traceback (most recent call last)
-Cell <span class="ansi-green-intense-fg ansi-bold">In[1], line 102</span>
-<span class="ansi-green-fg">    100</span> conv<span style="color: rgb(98,98,98)">.</span>Assemble()
-<span class="ansi-green-fg">    101</span> f1<span style="color: rgb(98,98,98)">.</span>Assemble()
-<span class="ansi-green-intense-fg ansi-bold">--&gt; 102</span> <span class="ansi-yellow-bg">gfu_temp</span><span style="color: rgb(98,98,98)">.</span>vec<span style="color: rgb(98,98,98)">.</span>data <span style="color: rgb(98,98,98)">=</span> <span style="color: rgb(98,98,98)">2</span> <span style="color: rgb(98,98,98)">*</span> gfu<span style="color: rgb(98,98,98)">.</span>vec <span style="color: rgb(98,98,98)">-</span> gfu_old<span style="color: rgb(98,98,98)">.</span>vec
-<span class="ansi-green-fg">    103</span> rhs <span style="color: rgb(98,98,98)">=</span>  conv<span style="color: rgb(98,98,98)">.</span>mat <span style="color: rgb(98,98,98)">*</span> gfu_temp<span style="color: rgb(98,98,98)">.</span>vec <span style="color: rgb(98,98,98)">+</span> f1<span style="color: rgb(98,98,98)">.</span>vec <span style="color: rgb(98,98,98)">-</span> a1<span style="color: rgb(98,98,98)">.</span>mat <span style="color: rgb(98,98,98)">*</span> gfu_D<span style="color: rgb(98,98,98)">.</span>vec
-<span class="ansi-green-fg">    104</span> gfu_pre<span style="color: rgb(98,98,98)">.</span>vec<span style="color: rgb(98,98,98)">.</span>data <span style="color: rgb(98,98,98)">=</span> gfu_D<span style="color: rgb(98,98,98)">.</span>vec <span style="color: rgb(98,98,98)">+</span> inv1 <span style="color: rgb(98,98,98)">*</span> rhs
-
-<span class="ansi-red-intense-fg ansi-bold">NameError</span>: name &#39;gfu_temp&#39; is not defined
-</pre></div></div>
-</div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[41]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>from ngsolve import *
-from ngsolve.webgui import Draw
-from netgen.occ import *
-from netgen.webgui import Draw as DrawGeo
-import matplotlib
-import numpy as np
-import matplotlib.pyplot as plt
-
-shape = Rectangle(2.2,0.41).Circle(0.2,0.2,0.05).Reverse().Face()  # 先绘制一个矩形，再在(0.2,0.2)位置绘制圆，并Reverse使其为interface
-shape.edges.name = &quot;cyl&quot; # 圆形表面
-shape.edges.Max(X).name = &quot;outlet&quot;
-shape.edges.Min(X).name = &quot;inlet&quot;
-shape.edges.Max(Y).name = &quot;wall&quot;
-shape.edges.Min(Y).name = &quot;wall&quot;
-mesh = Mesh(OCCGeometry(shape, dim=2).GenerateMesh(maxh = 1/8)).Curve(3) # 三阶多项式拟合曲线
-# n = specialcf.normal(mesh.dim)
-n  = specialcf.normal(mesh.dim)        # 外法向
-Id = Id(mesh.dim)                       # 单位张量  (或  Id(2)  )
-rho = 1                                 # ρ=1 已隐含在 ν 里
-D   = 0.1                               # 圆柱直径（用来算系数）
-Uref = 1.5                              # 入口平均速度
-
-# # 绘制物理域及计算域
-# DrawGeo(shape);
-# Draw(mesh); # OCCGeometry会根据绘制图像复杂性生成不同粗细的网格拟合（如圆附近网格会更细）
-
-nu = 0.001
-k = 3 # 空间阶数
-dt = 0.001 # 定义时间步长
-t = 0
-i = 0
-time_vals, drag_x_vals, drag_y_vals = [],[],[]
-
-V = VectorH1(mesh, order = k, dirichlet = &quot;wall|cyl|inlet&quot;)
-Q = H1(mesh, order = k-1) # 未指明的边界默认为自然边界条件（在弱形式中会体现为零Neumann边界条件）
-X = V * Q # 定义速度场与压力场的耦合空间
-
-gfu0 = GridFunction(X) # 设置GridFunction作为解域，用于存储解作为后续初值使用
-gfu_mid = GridFunction(X)
-gfu_old = GridFunction(X)
-gfu_approximation = GridFunction(X)
-velocity, pressure = gfu0.components # X由V，P组成，gfu.components即为[V，P]
-uin = CF((1.5*4*y*(0.41-y)/(0.41**2),0)) # CF为系数矩阵
-velocity.Set(uin, definedon = mesh.Boundaries(&quot;inlet&quot;))
-
-# 设置Trial和Test函数
-(u,p),(v,q) = X.TnT()
-
-a = BilinearForm((nu*InnerProduct(grad(u),grad(v)) - div(v)*p - div(u)*q)*dx).Assemble()
-f = LinearForm(X).Assemble() # 默认为0
-
-res = f.vec - a.mat * gfu0.vec
-inv_stokes = a.mat.Inverse(X.FreeDofs())
-gfu0.vec.data += inv_stokes * res
-
-mean_p = Integrate(pressure, mesh)
-domain_vol = Integrate(1, mesh)
-mean_val = mean_p / domain_vol
-
-# 2. 创建 offset 向量
-ones = pressure.vec.CreateVector()
-ones[:] = 1.0
-offset = mean_val * ones
-
-# 3. 减去 offset，实现零均值
-pressure.vec.data -= offset
-
-Draw(gfu0.components[0])
-</pre></div>
-</div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "87853f3977ed4f0cbd58a9e6ae7e7074", "version_major": 2, "version_minor": 0}</script></div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[41]:
-</pre></div>
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-BaseWebGuiScene
-</pre></div></div>
-</div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[42]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>from ngsolve import *
-from ngsolve.webgui import Draw
-from netgen.occ import *
-from netgen.webgui import Draw as DrawGeo
-import matplotlib
-import numpy as np
-import matplotlib.pyplot as plt
-
-shape = Rectangle(2.2,0.41).Circle(0.2,0.2,0.05).Reverse().Face()  # 先绘制一个矩形，再在(0.2,0.2)位置绘制圆，并Reverse使其为interface
-shape.edges.name = &quot;cyl&quot; # 圆形表面
-shape.edges.Max(X).name = &quot;outlet&quot;
-shape.edges.Min(X).name = &quot;inlet&quot;
-shape.edges.Max(Y).name = &quot;wall&quot;
-shape.edges.Min(Y).name = &quot;wall&quot;
-mesh = Mesh(OCCGeometry(shape, dim=2).GenerateMesh(maxh = 1/8)).Curve(3) # 三阶多项式拟合曲线
-
-# n  = specialcf.normal(mesh.dim)
-# Id = Id(mesh.dim)
-# rho = 1
-# D   = 0.1
-# Uref = 1.5
-
-nu = 0.001
-k = 3 # 空间阶数
-dt = 0.001 # 定义时间步长
-t = 0
-i = 0
-time_vals, drag_x_vals, drag_y_vals = [],[],[]
-
-V = VectorH1(mesh, order = k, dirichlet = &quot;wall|cyl|inlet&quot;)
-Q = H1(mesh, order = k-1)
-
-u,v = V.TnT()
-p,q = Q.TnT()
-
-i = 0
-tend = 1
-# 初始速度和压力
-gfu = GridFunction(V)
-gfu_D = GridFunction(V)
-gfu_p = GridFunction(Q)
-gfu_pre = GridFunction(V)
-gfu_ptemp = GridFunction(Q)
-
-uin = CF((1.5*4*y*(0.41-y)/(0.41**2),0)) # CF为系数矩阵
-gfu_D.Set(uin, definedon = mesh.Boundaries(&quot;inlet&quot;))
-# Draw(gfu_D)
-gfu.vec.data = gfu0.components[0].vec
-gfu_p.vec.data = gfu0.components[1].vec
-# Draw(gfu_p)
-a1 = BilinearForm((InnerProduct(u, v) + dt * nu * InnerProduct(grad(u),grad(v))) * dx).Assemble()
-inv1 = a1.mat.Inverse(V.FreeDofs())
-r1 = BilinearForm(V,nonassemble = True)
-r1 += (InnerProduct(u, v) - dt * (Grad(u) * u) * v ) * dx
-f1 = LinearForm(V,nonassemble = True)
-f1 += dt * InnerProduct(gfu_p,div(v)) * dx
-a2 = BilinearForm(InnerProduct(grad(p), grad(q)) * dx).Assemble()
-inv2 = a2.mat.Inverse(Q.FreeDofs())
-f2 = LinearForm(Q,nonassemble = True)
-f2 +=  - 1/dt * InnerProduct(div(gfu_pre),q) * dx
-
-t = 0
-i = 0
-tend = 1
-gfut = GridFunction(gfu.space,multidim = 0)
-gfut.AddMultiDimComponent(gfu.vec)
-
-while t &lt; tend - 0.5*dt:
-    print (&quot;\rt=&quot;, t, end=&quot;&quot;)
-    r1.Assemble()
-    f1.Assemble()
-    rhs =  r1.mat * gfu.vec + f1.vec - a1.mat * gfu_D.vec
-    gfu_pre.vec.data = gfu_D.vec + inv1 * rhs
-    Draw(gfu_pre)
-
-    f2.Assemble()
-    gfu_ptemp.vec.data = inv2 * f2.vec
-
-    mean_p = Integrate(gfu_ptemp, mesh)
-    domain_vol = Integrate(1, mesh)
-    mean_val = mean_p / domain_vol
-    # 2. 创建 offset 向量
-    ones = gfu_ptemp.vec.CreateVector()
-    ones[:] = 1.0
-    offset = mean_val * ones
-    # 3. 减去 offset，实现零均值
-    gfu_ptemp.vec.data -= offset
-
-    gfu_p.vec.data += gfu_ptemp.vec
-
-    Draw(gfu_ptemp)
-    # Draw(gfu_p)
-    correction = GridFunction(V)
-    correction.Set(grad(gfu_ptemp))
-
-    gfu.vec.data = gfu_pre.vec - dt * correction.vec
-
-    # Draw(gfu)
-    if i == 5:
-        break
-    if i % 100 == 0:
-        gfut.AddMultiDimComponent(gfu.vec)
-    t += dt
-    i += 1
-
-# Draw (gfut, mesh, interpolate_multidim=True, animate=True, autoscale=False, vectors = True);
-</pre></div>
-</div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-t= 0
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "ccc3f6a29c2746b2b29019f826ae3314", "version_major": 2, "version_minor": 0}</script></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "02b13d303c334d509a20e708376e03e9", "version_major": 2, "version_minor": 0}</script></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-t= 0.001
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "18ef5d02abd54d308562cd915af384be", "version_major": 2, "version_minor": 0}</script></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "ff1d281182fa4bdf8c37301953d4b830", "version_major": 2, "version_minor": 0}</script></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-t= 0.002
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "8dbc3b63ea8749d894572ce30cd3b057", "version_major": 2, "version_minor": 0}</script></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "6b348270bae34d5391266edc8e0bab48", "version_major": 2, "version_minor": 0}</script></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-t= 0.003
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "fa5b5e62f45d472b844cea3ad4a8f158", "version_major": 2, "version_minor": 0}</script></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "1fcf014a06a345f59d25bf84618c7cec", "version_major": 2, "version_minor": 0}</script></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-t= 0.004
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "38000d4c227441ec8480bca9f6d74b4a", "version_major": 2, "version_minor": 0}</script></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "68cf4ae124d4431ab9e5a9411a2d4a7c", "version_major": 2, "version_minor": 0}</script></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-t= 0.005
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "f4e8e94a3b49412096f827104a5c3b19", "version_major": 2, "version_minor": 0}</script></div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<script type="application/vnd.jupyter.widget-view+json">{"model_id": "822b2b68beb34b50a0636999a47a7849", "version_major": 2, "version_minor": 0}</script></div>
-</div>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
 </pre></div>
 </div>
 </div>
