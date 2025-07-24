@@ -1,0 +1,802 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="zh-CN" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Navier–Stokes 方程与弱形式 &mdash; 有限元 draft 文档</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
+
+  
+    <link rel="canonical" href="https://qiq7qi.github.io/NGsolve-self-learn-turiols/html/notebooks/Flow_around_a_cylinder.html" />
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=bf690008"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/translations.js?v=beaddf03"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="搜索" href="../search.html" />
+    <link rel="prev" title="Welcome to 有限元&#39;s documentation!" href="../index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            有限元
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="搜索文档" aria-label="搜索文档" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="导航菜单">
+              <p class="caption" role="heading"><span class="caption-text">目录:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Navier–Stokes 方程与弱形式</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#1.-方程组">1. 方程组</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#2.-初始与边界条件">2. 初始与边界条件</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#3.-弱形式推导">3. 弱形式推导</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="#1.-必要准备">1. 必要准备</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#1.1-导入必要库">1.1 导入必要库</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#1.2-必要参数设置">1.2 必要参数设置</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="#2.-几何建模与网格生成（Geometry-and-Mesh-Generation）">2. 几何建模与网格生成（Geometry and Mesh Generation）</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#2.1-几何定义">2.1 几何定义</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#2.2-边界条件区域标记">2.2 边界条件区域标记</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#2.3-网格生成">2.3 网格生成</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="#3.-有限元空间，边界条件与初值条件设定（Finite-Element-Spaces,-Boundary-Conditions-and-Initial-Condition）">3. 有限元空间，边界条件与初值条件设定（Finite Element Spaces, Boundary Conditions and Initial Condition）</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#3.1-有限元空间定义">3.1 有限元空间定义</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#3.2-解函数与边界条件设定">3.2 解函数与边界条件设定</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#3.3-Stokes-初始解的构造">3.3 Stokes 初始解的构造</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="#4-时间离散与对流项处理">4 时间离散与对流项处理</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#4.1-一般形式">4.1 一般形式</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#非齐次-Dirichlet-边界条件的处理">非齐次 Dirichlet 边界条件的处理</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#4.2-增量形式">4.2 增量形式</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="#前置步骤同前">前置步骤同前</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#5.-结果输出与可视化准备（Postprocessing-and-Visualization-Setup）">5. 结果输出与可视化准备（Postprocessing and Visualization Setup）</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="移动版导航菜单" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">有限元</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="页面导航">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Navier–Stokes 方程与弱形式</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/notebooks/Flow_around_a_cylinder.ipynb.txt" rel="nofollow"> 查看页面源码</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="Navier–Stokes-方程与弱形式">
+<h1>Navier–Stokes 方程与弱形式<a class="headerlink" href="#Navier–Stokes-方程与弱形式" title="Link to this heading"></a></h1>
+<p>不可压缩 Navier–Stokes 方程是描述粘性不可压流体随时间演化的基本模型，广泛应用于工程、物理和生物流体等领域。在本节中，我们将介绍其强形式与弱形式，并为后续数值离散构建理论基础。</p>
+<section id="1.-方程组">
+<h2>1. 方程组<a class="headerlink" href="#1.-方程组" title="Link to this heading"></a></h2>
+<p>考虑在时空区域 <img class="math" src="../_images/math/6243376b551cbb7bc07b4e0db9e837e8c32194d6.png" alt="Q := \Omega \times (0,T)"/> 上的不可压缩 Navier–Stokes 方程，其组成如下：</p>
+<ol class="arabic">
+<li><p><strong>动量方程（Newton 第二定律）</strong>：</p>
+<div class="math">
+<p><img src="../_images/math/d5672e3e0df2d50478673eb1cd1a6ef5a15cd807.png" alt="\rho \frac{\partial \mathbf{u}}{\partial t} + \rho (\mathbf{u} \cdot \nabla) \mathbf{u} = -\nabla p + \mu \Delta \mathbf{u} + \mathbf{f},"/></p>
+</div></li>
+<li><p><strong>质量守恒方程（不可压缩性约束）</strong>：</p>
+<div class="math">
+<p><img src="../_images/math/f4e872737212810f661c69815c6f079ad7823b31.png" alt="\nabla \cdot \mathbf{u} = 0."/></p>
+</div></li>
+</ol>
+<p>其中变量含义为：</p>
+<ul class="simple">
+<li><p><img class="math" src="../_images/math/7e42fc2171293ccedebad963136fe73f26327bd8.png" alt="\mathbf{u} : \Omega \to \mathbb{R}^d"/> 为速度场；</p></li>
+<li><p><img class="math" src="../_images/math/1feff0803e5f5f8ad259b4b9d13b615ef61b3656.png" alt="p : \Omega \to \mathbb{R}"/> 为压力场；</p></li>
+<li><p><img class="math" src="../_images/math/27dc86f9f1b1c3435b2403a869b5870c582facea.png" alt="\rho"/> 为常数密度；</p></li>
+<li><p><img class="math" src="../_images/math/4a3598141469c2555591e66606a1b86d4ec6dca9.png" alt="\mu"/> 为动力黏性系数；</p></li>
+<li><p><img class="math" src="../_images/math/1394de63052384f360d7e83e57e842a4bb2a7c68.png" alt="\mathbf{f}"/> 为体积力源项；</p></li>
+<li><p>通常 <img class="math" src="../_images/math/a1a74994f02f2791353643354e59abfabaf7e340.png" alt="\Omega \subset \mathbb{R}^d"/>，<img class="math" src="../_images/math/70c185d024e038ba37d7018dc84eefd8616db41a.png" alt="d=2"/> 或 <img class="math" src="../_images/math/3204f0580808cc1d3ded72d87384c025c9e7e272.png" alt="3"/>。</p></li>
+</ul>
+</section>
+<hr class="docutils" />
+<section id="2.-初始与边界条件">
+<h2>2. 初始与边界条件<a class="headerlink" href="#2.-初始与边界条件" title="Link to this heading"></a></h2>
+<p>为使问题适定，需要规定以下边值条件与初始条件：</p>
+<ul>
+<li><p><strong>速度 Dirichlet 边界条件</strong>：</p>
+<div class="math">
+<p><img src="../_images/math/8b7cdefdf71af79b2be46f7056915ee96997acfa.png" alt="\mathbf{u} = \mathbf{g} \quad \text{on } \partial \Omega_D \times (0,T),"/></p>
+</div></li>
+<li><p><strong>Neumann 自然边界条件</strong>（对应出口或自由边界）：</p>
+<div class="math">
+<p><img src="../_images/math/3dd47dcf716f2cd60d60d1820d30b4a45cc1490c.png" alt="\boldsymbol{\sigma}(\mathbf{u}, p) \cdot \mathbf{n} = \mathbf{h} \quad \text{on } \partial \Omega_N \times (0,T),"/></p>
+</div><p>其中</p>
+<div class="math">
+<p><img src="../_images/math/4a86dec3e62d246f0059557d4587d44bf8a7a5b1.png" alt="\boldsymbol{\sigma}(\mathbf{u}, p) := -p \mathbf{I} + 2\mu \varepsilon(\mathbf{u}), \quad
+\varepsilon(\mathbf{u}) := \frac{1}{2}(\nabla \mathbf{u} + \nabla \mathbf{u}^T)."/></p>
+</div></li>
+<li><p><strong>初始条件</strong>：</p>
+<div class="math">
+<p><img src="../_images/math/962bbfb32d7182894010d3299876c2a16c06bcfb.png" alt="\mathbf{u}(\mathbf{x}, 0) = \mathbf{u}_0(\mathbf{x}) \quad \text{in } \Omega."/></p>
+</div></li>
+</ul>
+</section>
+<hr class="docutils" />
+<section id="3.-弱形式推导">
+<h2>3. 弱形式推导<a class="headerlink" href="#3.-弱形式推导" title="Link to this heading"></a></h2>
+<p>为进行有限元离散，我们对方程组乘以测试函数，并在空间上积分，得到如下弱形式。</p>
+<p>设：</p>
+<ul class="simple">
+<li><p><img class="math" src="../_images/math/1311f205f4c700b77515d1634d629a43567a6c16.png" alt="\mathbf{V} := \{ \mathbf{v} \in [H^1(\Omega)]^d \mid \mathbf{v} = \mathbf{0} \text{ on } \partial \Omega_D \}"/>；</p></li>
+<li><p><img class="math" src="../_images/math/ddd348963118786d8c159fec97a798353e6c324d.png" alt="Q := L^2(\Omega)"/>。</p></li>
+</ul>
+<p>则寻找 <img class="math" src="../_images/math/04bc4a15b307a609215f8aaa71358873732bde8f.png" alt="(\mathbf{u}, p) : [0, T] \to \mathbf{V} \times Q"/>，使得对于任意 <img class="math" src="../_images/math/2aa502434c95664788e892d05c621c91ce203b3d.png" alt="(\mathbf{v}, q) \in \mathbf{V} \times Q"/>，有：</p>
+<div class="math">
+<p><img src="../_images/math/4650f40d67954cd7a5f969aecc2868ab37bd4dc8.png" alt="\begin{aligned}
+\int_{\Omega} \partial_t \mathbf{u} \cdot \mathbf{v} \, dx
++ \int_{\Omega} \nu \nabla \mathbf{u} : \nabla \mathbf{v} \, dx
++ \int_{\Omega} (\mathbf{u} \cdot \nabla)\mathbf{u} \cdot \mathbf{v} \, dx
+- \int_{\Omega} p \nabla \cdot \mathbf{v} \, dx
+&amp;= \int_{\Omega} \mathbf{f} \cdot \mathbf{v} \, dx, \\
+- \int_{\Omega} q \, \nabla \cdot \mathbf{u} \, dx &amp;= 0.
+\end{aligned}"/></p>
+</div><p>附带初始条件：</p>
+<div class="math">
+<p><img src="../_images/math/0bdfe4298bca11b5fac4621c042d615cf17cfd81.png" alt="\mathbf{u}(x, 0) = \mathbf{u}_0(x) \quad \text{in } \Omega."/></p>
+</div></section>
+</section>
+<section id="1.-必要准备">
+<h1>1. 必要准备<a class="headerlink" href="#1.-必要准备" title="Link to this heading"></a></h1>
+<section id="1.1-导入必要库">
+<h2>1.1 导入必要库<a class="headerlink" href="#1.1-导入必要库" title="Link to this heading"></a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>from ngsolve import *
+from ngsolve.webgui import Draw
+from netgen.occ import *
+from netgen.webgui import Draw as DrawGeo
+import matplotlib
+import numpy as np
+import matplotlib.pyplot as plt
+</pre></div>
+</div>
+</div>
+</section>
+<section id="1.2-必要参数设置">
+<h2>1.2 必要参数设置<a class="headerlink" href="#1.2-必要参数设置" title="Link to this heading"></a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>nu = 0.001
+dt = 0.001
+k = 3
+tend = 1
+t = 0; cnt = 0
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+<section id="2.-几何建模与网格生成（Geometry-and-Mesh-Generation）">
+<h1>2. 几何建模与网格生成（Geometry and Mesh Generation）<a class="headerlink" href="#2.-几何建模与网格生成（Geometry-and-Mesh-Generation）" title="Link to this heading"></a></h1>
+<p>为研究不可压缩纳维-斯托克斯（Navier–Stokes）方程在典型二维内部流动结构中的数值行为，本文采用有限元软件 <strong>NGSolve</strong> 构建了一个包含圆柱障碍物的二维矩形通道几何模型。该几何结构为经典的 <strong>流经圆柱的流体问题（flow around a cylinder）</strong> 提供了基础测试平台。</p>
+<section id="2.1-几何定义">
+<h2>2.1 几何定义<a class="headerlink" href="#2.1-几何定义" title="Link to this heading"></a></h2>
+<p>本研究所用的二维流动区域由以下部分构成：</p>
+<ul class="simple">
+<li><p>一个长为 <img class="math" src="../_images/math/da931bd9f9353f6d51c043d0057639dff68d0fb7.png" alt="2.2"/>、高为 <img class="math" src="../_images/math/2426558fc24f7cde5d6d153c0346a23153d6d73b.png" alt="0.41"/> 的矩形通道；</p></li>
+<li><p>通道内部嵌有一个位于坐标点 <img class="math" src="../_images/math/f56780c7682f98c19194091b7f8f821ae864c69c.png" alt="(0.2, 0.2)"/>、半径为 <img class="math" src="../_images/math/cd53b1398e9c86ebea6c66a6cc4dc8da5529f071.png" alt="0.05"/> 的圆柱障碍物。</p></li>
+</ul>
+<p>上述几何通过 <code class="docutils literal notranslate"><span class="pre">Netgen/NGSolve</span></code> 的 <code class="docutils literal notranslate"><span class="pre">OCCGeometry</span></code> 模块构造如下：</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>shape = Rectangle(2.2,0.41).Circle(0.2,0.2,0.05).Reverse().Face()
+</pre></div>
+</div>
+</div>
+</section>
+<section id="2.2-边界条件区域标记">
+<h2>2.2 边界条件区域标记<a class="headerlink" href="#2.2-边界条件区域标记" title="Link to this heading"></a></h2>
+<p>为设定恰当的边界条件，需为几何边界赋予明确的名称，以便在后续弱形式构造与有限元空间定义中调用。具体边界标记如下：</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># 为几何边界命名，用于后续施加边界条件
+shape.edges.name = &quot;cyl&quot;             # 内部圆柱边界
+shape.edges.Min(X).name = &quot;inlet&quot;    # 左侧入口边界
+shape.edges.Max(X).name = &quot;outlet&quot;   # 右侧出口边界
+shape.edges.Min(Y).name = &quot;wall&quot;     # 下壁面
+shape.edges.Max(Y).name = &quot;wall&quot;     # 上壁面
+</pre></div>
+</div>
+</div>
+</section>
+<section id="2.3-网格生成">
+<h2>2.3 网格生成<a class="headerlink" href="#2.3-网格生成" title="Link to this heading"></a></h2>
+<p>构建完成的几何体通过 OCC（OpenCascade） 内核生成有限元网格。为平衡计算效率与精度，本文将最大单元尺寸 <code class="docutils literal notranslate"><span class="pre">maxh</span></code> 设置为 <img class="math" src="../_images/math/a54640b9481881019453a302c0166f53d4ceeef2.png" alt="1/8"/>，并使用三阶曲线单元对边界进行几何拟合。</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>mesh = Mesh(OCCGeometry(shape, dim=2).GenerateMesh(maxh=1/8)).Curve(3)
+# `GenerateMesh(maxh=1/8)` 表示使用最大网格尺度为 $0.125$；
+# `.Curve(3)` 将几何边界提升为三阶拟合，以更准确地表示圆柱边界。
+</pre></div>
+</div>
+</div>
+<p>绘制图像（可选）</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>DrawGeo(shape);
+Draw(mesh);
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "3ad9d57799fe4a2cbe9e8beee9736037", "version_major": 2, "version_minor": 0}</script></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "5b05865fb3b34d18aafbd9abfb19e31d", "version_major": 2, "version_minor": 0}</script></div>
+</div>
+</section>
+</section>
+<section id="3.-有限元空间，边界条件与初值条件设定（Finite-Element-Spaces,-Boundary-Conditions-and-Initial-Condition）">
+<h1>3. 有限元空间，边界条件与初值条件设定（Finite Element Spaces, Boundary Conditions and Initial Condition）<a class="headerlink" href="#3.-有限元空间，边界条件与初值条件设定（Finite-Element-Spaces,-Boundary-Conditions-and-Initial-Condition）" title="Link to this heading"></a></h1>
+<p>为求解不可压缩 Navier–Stokes 方程，我们采用混合有限元方法构造速度和压力的函数空间。速度采用二阶向量型连续有限元（VectorH1），压力采用一阶标量连续有限元（H1），从而形成经典的 P2-P1 速度-压力配对，满足稳定性条件。</p>
+<section id="3.1-有限元空间定义">
+<h2>3.1 有限元空间定义<a class="headerlink" href="#3.1-有限元空间定义" title="Link to this heading"></a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>V = VectorH1(mesh, order=k, dirichlet=&quot;wall|cyl|inlet&quot;)  # 设置速度空间，指定 Dirichlet 边界为壁面、圆柱和入口
+Q = H1(mesh, order=k-1)                                  # 压力空间为标量一阶 H1 空间
+X = V * Q                                                # 构造混合有限元空间（速度 × 压力）
+</pre></div>
+</div>
+</div>
+</section>
+<section id="3.2-解函数与边界条件设定">
+<h2>3.2 解函数与边界条件设定<a class="headerlink" href="#3.2-解函数与边界条件设定" title="Link to this heading"></a></h2>
+<p>在耦合空间 <code class="docutils literal notranslate"><span class="pre">X</span></code> 上定义解函数 <code class="docutils literal notranslate"><span class="pre">gfu</span></code> ，其包含速度和压力两个分量，分别命名以方便调用和边界条件施加。</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>gfu = GridFunction(X)
+velocity, pressure = gfu.components
+</pre></div>
+</div>
+</div>
+<p>为解向量定义非齐次Dirichlet边界条件 在入口处施加典型的层流抛物线速度分布，其 <img class="math" src="../_images/math/888f7c323ac0341871e867220ae2d76467d74d6e.png" alt="x"/> 方向速度分布为：</p>
+<div class="math">
+<p><img src="../_images/math/9842f147b78506733973155609db84be847b02ea.png" alt="u_{\text{in}}(y) = \left( \frac{6}{0.41^2} y(0.41 - y), \; 0 \right)"/></p>
+</div><p>该分布在上下壁面速度为零，中部最大，符合管道流理论。</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>uin = CoefficientFunction((1.5 * 4 * y * (0.41 - y) / (0.41 * 0.41), 0))  # 抛物线型入口速度分布
+velocity.Set(uin, definedon=mesh.Boundaries(&quot;inlet&quot;))                    # 在 inlet 边界上设置速度 Dirichlet 条件
+</pre></div>
+</div>
+</div>
+<p>绘制图像（可选）</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>Draw(velocity);
+Draw(pressure);
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "b4a0eef95ff84ec9a12387aed323a992", "version_major": 2, "version_minor": 0}</script></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "089f8866d00240e0ab33b34a301f96f5", "version_major": 2, "version_minor": 0}</script></div>
+</div>
+</section>
+<section id="3.3-Stokes-初始解的构造">
+<h2>3.3 Stokes 初始解的构造<a class="headerlink" href="#3.3-Stokes-初始解的构造" title="Link to this heading"></a></h2>
+<p>为提供稳定的初值，用稳态 Stokes 问题构造一个速度–压力场作为初始化。首先定义试验函数和检验函数，并构建双线性形式：</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>(u, p), (v, q) = X.TnT()                                                  # 获取试验函数与检验函数
+a = BilinearForm(X)                                                      # 定义双线性形式
+stokes = (nu * InnerProduct(grad(u), grad(v)) - div(u) * q - div(v) * p) * dx  # Stokes 双线性项
+a += stokes                                                              # 加入双线性形式中
+a.Assemble();                                                             # 组装刚度矩阵
+f = LinearForm(X)         # 定义右端项
+f.Assemble()              # 组装右端项
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;ngsolve.comp.LinearForm at 0x1b0b8e3e270&gt;
+</pre></div></div>
+</div>
+<p>最后求解 Stokes 系统，并将解更新至 ‘gfu.vec’ 以作为后续 Navier–Stokes 求解的初始值：</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>res = f.vec - a.mat * gfu.vec                  # 计算初始残差
+inv_stokes = a.mat.Inverse(X.FreeDofs())       # 构建在自由自由度上的逆算子
+gfu.vec.data += inv_stokes * res               # 更新解函数为稳态 Stokes 解
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>drag_x_test = GridFunction(X)
+drag_x_test.components[0].Set(CoefficientFunction((-20.0,0)), definedon=mesh.Boundaries(&quot;cyl&quot;))
+drag_y_test = GridFunction(X)
+drag_y_test.components[0].Set(CoefficientFunction((0,-20.0)), definedon=mesh.Boundaries(&quot;cyl&quot;))
+</pre></div>
+</div>
+</div>
+<p>绘制图像（可选）</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>Draw(velocity);
+Draw(pressure);
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "88c05f97e54f4a90be216ffd389a380d", "version_major": 2, "version_minor": 0}</script></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "118699729bfa494992256de753c21374", "version_major": 2, "version_minor": 0}</script></div>
+</div>
+</section>
+</section>
+<section id="4-时间离散与对流项处理">
+<h1>4 时间离散与对流项处理<a class="headerlink" href="#4-时间离散与对流项处理" title="Link to this heading"></a></h1>
+<p>不可压缩 Navier–Stokes 方程的完整形式为：</p>
+<div class="math">
+<p><img src="../_images/math/b5073f5292168fd648109b3a239235b3f2ae2f0a.png" alt="\begin{aligned}
+\partial_t \mathbf{u} + (\mathbf{u} \cdot \nabla)\mathbf{u} - \nu \Delta \mathbf{u} + \nabla p &amp;= \mathbf{f} \quad \text{in } \Omega, \\
+\operatorname{div}(\mathbf{u}) &amp;= 0 \quad \text{in } \Omega.
+\end{aligned}"/></p>
+</div><section id="4.1-一般形式">
+<h2>4.1 一般形式<a class="headerlink" href="#4.1-一般形式" title="Link to this heading"></a></h2>
+<p>我们采用 <strong>隐式–显式欧拉时间离散（IMEX Euler）</strong> 策略，对时间导数项使用向后差分，对扩散项隐式处理，对对流项显式处理。</p>
+<p>设当前时间为 <img class="math" src="../_images/math/69c0b6d6ec9f0d9556cd04c888f961941ef2b339.png" alt="t^n"/>，时间步长为 <img class="math" src="../_images/math/b4ed9c2e208e08edeca8b1550ec0840acd090276.png" alt="\Delta t"/>，已知速度解 <img class="math" src="../_images/math/0dadbec652ff01bc804b093ae095519e4ade7c80.png" alt="\mathbf{u}^n"/>，则时间离散形式为：</p>
+<p><img class="math" src="../_images/math/132902ac7ab67d052324b05314ea73b8f8fad081.png" alt="(\mathbf{u}^{n+1},p^{n+1}) \in X = \mathbf{V} \times Q"/>, s.t. for all <img class="math" src="../_images/math/85174790768d7559d8dabb02037fd5e7d1e83663.png" alt="(\mathbf{v},q) \in X = \mathbf{V} \times Q"/></p>
+<p><span class="math">\begin{align}
+\underbrace{m(\mathbf{u}^{n+1},\mathbf{v}) + \Delta t ~\cdot~a((\mathbf{u}^{n+1},p^{n+1}),(\mathbf{v},q))}_{ \to M^\ast} ~=~m(\mathbf{u}^{n},\mathbf{v}) - \Delta t ~\cdot~c(\mathbf{u}^{n}; \mathbf{u}^{n},\mathbf{v})
+\end{align}</span></p>
+</section>
+<section id="非齐次-Dirichlet-边界条件的处理">
+<h2>非齐次 Dirichlet 边界条件的处理<a class="headerlink" href="#非齐次-Dirichlet-边界条件的处理" title="Link to this heading"></a></h2>
+<p>上节推导的离散系统默认速度满足 <img class="math" src="../_images/math/588f0eca288eef18a3114d54c1ba6bbbfe58639c.png" alt="\mathbf{u} = 0"/> 于 <img class="math" src="../_images/math/6cb77926737bab252e1f30994ebb4037a7d374aa.png" alt="\partial \Omega_D"/>（即齐次 Dirichlet 条件）。在实际问题中，尤其是通道流、绕流问题中，我们往往在入口边界施加给定的速度剖面（如抛物线型分布）：</p>
+<div class="math">
+<p><img src="../_images/math/f2644bfa7794f310e8a132c829afab1b1d72e042.png" alt="\mathbf{u} = \mathbf{g} \neq 0 \quad \text{on } \partial \Omega_D."/></p>
+</div><p>为处理这类<strong>非齐次边界条件</strong>，常用的方法是<strong>变量替换法（lifting method）</strong>，即将问题的解写为：</p>
+<div class="math">
+<p><img src="../_images/math/e9a4ed335187b2a15d90555efb307da1793f5a67.png" alt="\mathbf{u}^{n+1} = \mathbf{u}_h^{n+1} + \tilde{\mathbf{g}},"/></p>
+</div><p>其中：</p>
+<ul class="simple">
+<li><p><img class="math" src="../_images/math/88d2a5109c3f27e01152c3549ff71d3ee3ee8e33.png" alt="\mathbf{u}_h^{n+1} \in \mathbf{V}_0"/>，满足齐次边界条件，即 <img class="math" src="../_images/math/899c570e0f2564b869c2279995b8ad6ce8fb8a85.png" alt="\mathbf{u}_h^{n+1} = 0"/> on <img class="math" src="../_images/math/6cb77926737bab252e1f30994ebb4037a7d374aa.png" alt="\partial \Omega_D"/>；</p></li>
+<li><p><img class="math" src="../_images/math/055f2d99f838198bf830010239276dbfee1891be.png" alt="\tilde{\mathbf{g}}"/> 是某个固定向量场，满足边界条件 <img class="math" src="../_images/math/12bd2977de2747c349e21cce3043906c70bfddff.png" alt="\tilde{\mathbf{g}} = \mathbf{g}"/> on <img class="math" src="../_images/math/6cb77926737bab252e1f30994ebb4037a7d374aa.png" alt="\partial \Omega_D"/>，在内部可以任意延拓。</p></li>
+</ul>
+<p>将 <img class="math" src="../_images/math/5b7e889216ce3259c6725c81744aaec447415344.png" alt="\mathbf{u}^{n+1}"/> 代入离散系统中，并将其分离为：</p>
+<div class="math">
+<p><img src="../_images/math/16a110ae0e6032405ca368eee4426080e102a2e5.png" alt="\begin{pmatrix}
+    K &amp; Q \\
+    Q^T &amp; 0
+\end{pmatrix}
+\begin{pmatrix}
+    \mathbf{u}_h^{n+1} \\
+    \mathbf{p}^{n+1}
+\end{pmatrix}
+=
+\begin{pmatrix}
+    \mathrm{RHS}^{(i)} - K \tilde{\mathbf{g}} \\
+    - Q^T \tilde{\mathbf{g}}
+\end{pmatrix}."/></p>
+</div><p>我们看到，<strong>非齐次边界条件的影响表现为右端项的修正</strong>，且不改变系统矩阵本身的结构。这种处理方法有两个优点：</p>
+<ul class="simple">
+<li><p>不需修改原有刚度矩阵装配过程；</p></li>
+<li><p>保证数值求解仅在自由度上进行，边界值通过 <img class="math" src="../_images/math/055f2d99f838198bf830010239276dbfee1891be.png" alt="\tilde{\mathbf{g}}"/> 注入解中。</p></li>
+</ul>
+<p>在实现中，<img class="math" src="../_images/math/055f2d99f838198bf830010239276dbfee1891be.png" alt="\tilde{\mathbf{g}}"/> 通常通过如下方式构造：</p>
+<ul class="simple">
+<li><p>在边界上插值速度剖面 <img class="math" src="../_images/math/e269bee59d9979487e48b56b99e3e49dd6ebc093.png" alt="\mathbf{g}"/>；</p></li>
+<li><p>在内部扩展为零或任意连续向量场；</p></li>
+<li><p>将其作为 <code class="docutils literal notranslate"><span class="pre">GridFunction</span></code> 的“已知值”施加在 Dirichlet 边界上；</p></li>
+<li><p>并将自由节点构成的子系统送入线性求解器。</p></li>
+</ul>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>gfuD = GridFunction(X)
+velocityD, pressureD = gfuD.components
+
+velocityD.Set(uin, definedon=mesh.Boundaries(&quot;inlet&quot;))
+
+mstar = BilinearForm(X)
+mstar += InnerProduct(u,v)*dx + dt*stokes
+mstar.Assemble()
+inv = mstar.mat.Inverse(X.FreeDofs())
+
+conv = BilinearForm(X, nonassemble = True)
+conv += (Grad(u) * u) * v * dx
+
+m = BilinearForm(InnerProduct(u,v)*dx).Assemble()
+
+gfut = GridFunction(gfu.space,multidim=0)
+time_vals, drag_x_vals, drag_y_vals = [],[],[]
+
+gfut.AddMultiDimComponent(gfu.vec)
+t = 0; cnt = 0
+while t &lt; tend-0.5*dt:
+    print (&quot;\rt=&quot;, t, end=&quot;&quot;)
+
+    conv.Assemble()
+    # print(conv.mat)
+    rhs = (m.mat - dt * conv.mat) * gfu.vec - mstar.mat * gfuD.vec
+    gfu.vec.data = gfuD.vec + inv * rhs
+
+    t = t + dt; cnt += 1
+
+    res = (a.mat + conv.mat) * gfu.vec
+    drag_x_vals.append(InnerProduct(res, drag_x_test.vec) )
+    drag_y_vals.append(InnerProduct(res, drag_y_test.vec) )
+    time_vals.append(t)
+
+    if cnt % 100 == 0:
+        gfut.AddMultiDimComponent(gfu.vec)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+t= 0.999000000000000876
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>Draw (gfut.components[0], mesh, interpolate_multidim=True, animate=True,
+      min=0, max=1.9, autoscale=False, vectors = True)
+Draw (gfut.components[1], mesh, interpolate_multidim=True, animate=True,
+      min=-0.5, max=1, autoscale=False)
+
+# Plot drag force over time
+plt.plot(time_vals, drag_x_vals)
+plt.xlabel(&#39;time&#39;); plt.ylabel(&#39;drag&#39;); plt.title(&#39;drag&#39;); plt.grid(True)
+plt.show()
+# Plot lift force over time
+plt.plot(time_vals, drag_y_vals)
+plt.xlabel(&#39;time&#39;); plt.ylabel(&#39;lift&#39;); plt.title(&#39;lift&#39;); plt.grid(True)
+plt.show()
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "6e36cd1ac50847728e55a8dd6f171ee1", "version_major": 2, "version_minor": 0}</script></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "c31c30bdb2b34a0b83d6212c3f48a132", "version_major": 2, "version_minor": 0}</script></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_Flow_around_a_cylinder_35_2.png" src="../_images/notebooks_Flow_around_a_cylinder_35_2.png" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_Flow_around_a_cylinder_35_3.png" src="../_images/notebooks_Flow_around_a_cylinder_35_3.png" />
+</div>
+</div>
+</section>
+<section id="4.2-增量形式">
+<h2>4.2 增量形式<a class="headerlink" href="#4.2-增量形式" title="Link to this heading"></a></h2>
+<p>在增量格式中，如采用显式对流–隐式扩散结构（参考 Section~:nbsphinx-math:<cite>ref{subsec:bdf1-assembly}</cite> 的增量推进格式），速度更新形式为：</p>
+<div class="math">
+<p><img src="../_images/math/f86f4490118a44927eac2e05fcb53c4ff2574885.png" alt="\mathbf{u}^{n+1} = \mathbf{u}^{n} + \delta\mathbf{u}^{n+1},"/></p>
+</div><p>其中 <img class="math" src="../_images/math/60082f69186d6c881504d23369a3eac27918d6b7.png" alt="\delta \mathbf{u}^{n+1}"/> 为当前步的速度增量。此时，边界条件 <img class="math" src="../_images/math/fc603ef5eb5d0761a1bc42a43d3164e7a8838d23.png" alt="\mathbf{u}^{n+1} = \mathbf{g}"/> 被改写为：</p>
+<div class="math">
+<p><img src="../_images/math/750dd91b097e0b2961b4967a0c460428f35ca44c.png" alt="\delta \mathbf{u}^{n+1} = \mathbf{g} - \mathbf{u}^{n} \quad \text{on } \partial\Omega_D."/></p>
+</div><p>因此，在构造增量形式下的系统时，只需将边界值 <img class="math" src="../_images/math/e269bee59d9979487e48b56b99e3e49dd6ebc093.png" alt="\mathbf{g}"/> 替换为 <img class="math" src="../_images/math/59dbcb0d444f46b86afc8281d6353e3c5cb32b1f.png" alt="\mathbf{g} - \mathbf{u}^{n}"/>，即可保证增量项满足新的 Dirichlet 条件。</p>
+<p>数值实现中，一般先构造上一时刻插值 <img class="math" src="../_images/math/d232f81657a7b0656193d918354a5567a704d01f.png" alt="\mathbf{u}^{n}"/>，再计算差值：</p>
+<p>与全量系统处理方式一致，增量式下 lifting 同样以修正右端项为主，系统矩阵结构不受影响。</p>
+<p>该策略不仅适用于 Navier–Stokes，也适用于带非齐次边界条件的任意双线性时间推进系统。</p>
+</section>
+</section>
+<section id="前置步骤同前">
+<h1>前置步骤同前<a class="headerlink" href="#前置步骤同前" title="Link to this heading"></a></h1>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>gfu = GridFunction(X)
+velocity, pressure = gfu.components
+
+uin = CoefficientFunction((1.5 * 4 * y * (0.41 - y) / (0.41 * 0.41), 0))  # 抛物线型入口速度分布
+velocity.Set(uin, definedon=mesh.Boundaries(&quot;inlet&quot;))                    # 在 inlet 边界上设置速度 Dirichlet 条件
+
+(u, p), (v, q) = X.TnT()                                                  # 获取试验函数与检验函数
+a = BilinearForm(X)                                                      # 定义双线性形式
+stokes = (nu * InnerProduct(grad(u), grad(v)) - div(u) * q - div(v) * p) * dx  # Stokes 双线性项
+a += stokes                                                              # 加入双线性形式中
+a.Assemble();                                                             # 组装刚度矩阵
+f = LinearForm(X)         # 定义右端项
+f.Assemble()              # 组装右端项
+
+res = f.vec - a.mat * gfu.vec                  # 计算初始残差
+inv_stokes = a.mat.Inverse(X.FreeDofs())       # 构建在自由自由度上的逆算子
+gfu.vec.data += inv_stokes * res               # 更新解函数为稳态 Stokes 解
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>mstar = BilinearForm(X)
+mstar += InnerProduct(u,v)*dx + dt*stokes
+mstar.Assemble()
+inv = mstar.mat.Inverse(X.FreeDofs())
+
+conv = BilinearForm(X, nonassemble = True)
+conv += (Grad(u) * u) * v * dx
+
+gfut = GridFunction(gfu.space,multidim=0)
+time_vals, drag_x_vals, drag_y_vals = [],[],[]
+
+gfut.AddMultiDimComponent(gfu.vec)
+t = 0; cnt = 0
+while t &lt; tend-0.5*dt:
+    print (&quot;\rt=&quot;, t, end=&quot;&quot;)
+
+    conv.Assemble()
+    # print(conv.mat)
+    res = (a.mat + conv.mat)* gfu.vec
+    gfu.vec.data -= dt * inv * res
+
+    t = t + dt; cnt += 1
+
+    res = (a.mat + conv.mat) * gfu.vec
+    drag_x_vals.append(InnerProduct(res, drag_x_test.vec) )
+    drag_y_vals.append(InnerProduct(res, drag_y_test.vec) )
+    time_vals.append(t)
+
+    if cnt % 100 == 0:
+        gfut.AddMultiDimComponent(gfu.vec)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+t= 0.999000000000000876
+</pre></div></div>
+</div>
+<p>动态图及drag-lift图像绘制（可选，若网格较细，动态图绘制可能对电脑造成较大负担）</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>Draw (gfut.components[0], mesh, interpolate_multidim=True, animate=True,
+      min=0, max=1.9, autoscale=False, vectors = True)
+Draw (gfut.components[1], mesh, interpolate_multidim=True, animate=True,
+      min=-0.5, max=1, autoscale=False)
+
+# Plot drag force over time
+plt.plot(time_vals, drag_x_vals)
+plt.xlabel(&#39;time&#39;); plt.ylabel(&#39;drag&#39;); plt.title(&#39;drag&#39;); plt.grid(True)
+plt.show()
+# Plot lift force over time
+plt.plot(time_vals, drag_y_vals)
+plt.xlabel(&#39;time&#39;); plt.ylabel(&#39;lift&#39;); plt.title(&#39;lift&#39;); plt.grid(True)
+plt.show()
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "881018b56f3c43d1976c875b052c6ed2", "version_major": 2, "version_minor": 0}</script></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "41cec71c52744b999a085aa6da4d76dd", "version_major": 2, "version_minor": 0}</script></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_Flow_around_a_cylinder_41_2.png" src="../_images/notebooks_Flow_around_a_cylinder_41_2.png" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/notebooks_Flow_around_a_cylinder_41_3.png" src="../_images/notebooks_Flow_around_a_cylinder_41_3.png" />
+</div>
+</div>
+<p>内容保存（使用paraview进行图像可视化）</p>
+</section>
+<section id="5.-结果输出与可视化准备（Postprocessing-and-Visualization-Setup）">
+<h1>5. 结果输出与可视化准备（Postprocessing and Visualization Setup）<a class="headerlink" href="#5.-结果输出与可视化准备（Postprocessing-and-Visualization-Setup）" title="Link to this heading"></a></h1>
+<p>数值模拟完成后，我们对所得解进行保存与可视化，主要包括两类数据：</p>
+<ul class="simple">
+<li><p>时间演化过程中<strong>阻力与升力的变化曲线</strong>；</p></li>
+<li><p>多帧速度与压强场的导出，用于可视化（如 Paraview）。</p></li>
+</ul>
+<p>我们将时间、<img class="math" src="../_images/math/888f7c323ac0341871e867220ae2d76467d74d6e.png" alt="x"/> 方向阻力（drag）与 <img class="math" src="../_images/math/1b5e577d6216dca3af7d87aa122a0b9b360d6cb3.png" alt="y"/> 方向升力（lift）保存为 <code class="docutils literal notranslate"><span class="pre">.npz</span></code> 格式，便于后续分析或绘图。</p>
+<p>为实现时序数据的三维可视化，我们还将解序列中的速度与压强分别导出为 VTK 文件。由于 NGSolve 是二维计算域，为满足 VTK 三维向量格式要求，需将速度向量补全为 <img class="math" src="../_images/math/ca1e7af84e7dd58156b504268d7c692f72f156ac.png" alt="(u, v, 0)"/>：</p>
+<p>最终，在 <code class="docutils literal notranslate"><span class="pre">ouputdir/Cylinder_Incremention_BDF1/</span></code> 目录下，将生成多个 <code class="docutils literal notranslate"><span class="pre">.vtu</span></code> 文件，供后续使用 Paraview 等工具进行可视化展示和动画制作。</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import numpy as np
+
+np.savez(&#39;cylinder_drag_lift.npz&#39;, time=time_vals, drag=drag_x_vals, lift=drag_y_vals)
+
+import os
+
+outdir = r&quot;.\ouputdir\Cylinder_Incremention_BDF1&quot;
+os.makedirs(outdir, exist_ok=True)  # 自动创建目录
+file_path = os.path.join(outdir, &quot;1000_8_1000&quot;)
+vel_cf = CoefficientFunction((
+    gfu.components[0][0],
+    gfu.components[0][1],
+    0.0  # 补上 Z 分量，使其为 3D vector
+))
+pres_cf = gfu.components[1]
+
+vtkout = VTKOutput(
+    mesh,
+    coefs = [vel_cf, pres_cf],
+    names = [&quot;velocity&quot;, &quot;pressure&quot;],
+    filename = file_path,
+    subdivision = 2
+)
+
+nframes = len(gfut.vecs)  # 多帧数量
+
+for i in range(nframes):
+    # 提取第i帧的解
+    gfu.vec.data = gfut.vecs[i]  # 恢复到第i帧
+    outname = vtkout.Do(time=i)
+print(&quot;已写出：&quot;, outname)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+已写出： .\ouputdir\Cylinder_Incremention_BDF1\1000_8_1000_step00010
+</pre></div></div>
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="页脚">
+        <a href="../index.html" class="btn btn-neutral float-left" title="Welcome to 有限元&#39;s documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> 上一页</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; 版权所有 2025, 齐琦琪。</p>
+  </div>
+
+  利用 <a href="https://www.sphinx-doc.org/">Sphinx</a> 构建，使用的 
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">主题</a>
+    由 <a href="https://readthedocs.org">Read the Docs</a> 开发.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
